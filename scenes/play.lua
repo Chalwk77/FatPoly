@@ -479,7 +479,6 @@ local function OnTick(event)
     end
 
     if (player) then
-
         if (player.resize) then
             local player2 = createPlayer(player.x, player.y, player.width, player.height, player.rotation, player.isVisible)
             if (player.isFocus) then
@@ -517,8 +516,10 @@ local function OnTick(event)
         object:translate(xDelta, yDelta)
 
         local off_screen = {
-            yPos > display.contentHeight + object.sizeXY, yPos < -object.sizeXY,
-            xPos > display.contentWidth + object.sizeXY, xPos < -object.sizeXY,
+            yPos > (display.contentHeight + object.sizeXY),
+            yPos < -object.sizeXY,
+            xPos > (display.contentWidth + object.sizeXY),
+            xPos < -object.sizeXY,
         }
 
         for i = 1, #off_screen do
@@ -553,12 +554,12 @@ local function OnTick(event)
                 if (object.objectType == "reward") then
                     Item = "penalty"
                 else
-                    bombshell = "reward"
+                    Item = "reward"
                 end
-                local closure = function()
+                local SpawnBonus = function()
                     return Spawn(Item, xVelocity, yVelocity)
                 end
-                timer.performWithDelay(math.random(6, 12) * 1000, closure, 1)
+                timer.performWithDelay(math.random(6, 12) * 1000, SpawnBonus, 1)
             end
             object:removeSelf()
             table.remove(objects, key)
@@ -630,7 +631,6 @@ local function onCollision(event)
 end
 
 function HeartsAnimation()
-
     local obj = health.hearts[health.hearts.current]
     local scaleUp = function()
         transition.to(obj, {
