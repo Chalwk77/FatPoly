@@ -14,8 +14,6 @@ local score = 0
 
 local tPrevious = system.getTimer()
 
-local border_group = display.newGroup()
-
 local objects = { }
 
 local health = { }
@@ -35,6 +33,8 @@ local scene = composer.newScene()
 --
 local ContentW = display.viewableContentWidth
 local ContentH = display.viewableContentHeight
+
+local borders = { }
 
 local function UpdateStats()
     local path = system.pathForFile(stats_file, system.DocumentsDirectory)
@@ -127,11 +127,15 @@ local function setUpDisplay(grp)
         right = { leftX + screenW, topY, leftX + screenW, bottomY }
     }
 
+    local lvl = game.current_level
+    local color = game.levels[lvl].params.border_color
+
     for k, _ in pairs(border) do
         local line = display.newLine(border[k][1], border[k][2], border[k][3], border[k][4])
-        line.strokeWidth = 10
-        line.alpha = 1
-        line:setStrokeColor(colors.RGB("red"))
+        line.strokeWidth = 15
+        line.alpha = 0.50
+        line:setStrokeColor(colors.RGB(color))
+        borders[k] = line
         grp:insert(line)
     end
 end
@@ -206,7 +210,7 @@ function scene:show(event)
 end
 
 function scene:hide(event)
-    --border_group:isVisible = false
+
 end
 
 function scene:destroy(event)
@@ -473,6 +477,7 @@ local function gameSpecial(objectType)
 end
 
 local function OnTick(event)
+
     if (gameIsOver) then
         return
     end
@@ -499,9 +504,9 @@ local function OnTick(event)
         --
         -- Display Level Label:
         --
-        local current = game.current_level
-        local required = game.levels[current].requirements[1]
-        levelLabel.text = "Level: " .. game.current_level .. "/" .. required
+        local lvl = game.current_level
+        local required = game.levels[lvl].params.pts
+        levelLabel.text = "Level: " .. lvl .. "/" .. required
     end
 
     local tDelta = event.time - tPrevious
@@ -591,7 +596,7 @@ local function onCollision(event)
             o.isVisible = false
 
             local current_level = game.current_level
-            local required = game.levels[current_level].requirements[1]
+            local required = game.levels[current_level].params.pts
 
             if (score == required) then
                 local new_level = current_level + 1

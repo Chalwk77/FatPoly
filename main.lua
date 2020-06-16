@@ -63,16 +63,16 @@ function CheckFile()
                 color = "default_color",
                 highscore = 0,
                 levels = {
-                    [1] = { enabled = true, requirements = { 30 } },
-                    [2] = { enabled = false, requirements = { 60 } },
-                    [3] = { enabled = false, requirements = { 90 } },
-                    [4] = { enabled = false, requirements = { 120 } },
-                    [5] = { enabled = false, requirements = { 150 } },
-                    [6] = { enabled = false, requirements = { 180 } },
-                    [7] = { enabled = false, requirements = { 210 } },
-                    [8] = { enabled = false, requirements = { 240 } },
-                    [9] = { enabled = false, requirements = { 270 } },
-                    [10] = { enabled = false, requirements = { 300 } },
+                    [1] = { enabled = true, params = { pts = 30, border_color = "red" } },
+                    [2] = { enabled = false, params = { pts = 60, border_color = "orange" } },
+                    [3] = { enabled = false, params = { pts = 90, border_color = "yellow" } },
+                    [4] = { enabled = false, params = { pts = 120, border_color = "green" } },
+                    [5] = { enabled = false, params = { pts = 150, border_color = "blue" } },
+                    [6] = { enabled = false, params = { pts = 180, border_color = "indigo" } },
+                    [7] = { enabled = false, params = { pts = 210, border_color = "violet" } },
+                    [8] = { enabled = false, params = { pts = 240, border_color = "teal" } },
+                    [9] = { enabled = false, params = { pts = 270, border_color = "purple" } },
+                    [10] = { enabled = false, params = { pts = 300, border_color = "pink" } },
                 }
             }
         end
