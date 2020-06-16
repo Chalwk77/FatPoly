@@ -20,6 +20,8 @@ local composer = require('composer')
 local scene = composer.newScene()
 
 local function setUpDisplay(grp)
+    display.setStatusBar(display.HiddenStatusBar)
+
     local background = display.newImage(grp, "images/backgrounds/background.png")
     background.xScale = (background.contentWidth / background.contentWidth)
     background.yScale = background.xScale
@@ -27,6 +29,31 @@ local function setUpDisplay(grp)
     background.y = display.contentHeight / 2
     background.alpha = 0.30
     background:addEventListener("touch", onTouch)
+    grp:insert(background)
+
+    rewardLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
+    rewardLabel.x = display.viewableContentWidth / 2
+    rewardLabel.y = 95
+    rewardLabel:setTextColor(0, 0, 0)
+    rewardLabel.alpha = 0
+    grp:insert(rewardLabel)
+
+    rewardBar = display.newRect(100, 80, 280, 30)
+    rewardBar:setFillColor(0, 0, 0, 50)
+    rewardBar.isVisible = false
+    grp:insert(rewardBar)
+
+    penaltyLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
+    penaltyLabel.x = display.viewableContentWidth / 2
+    penaltyLabel.y = display.viewableContentHeight - 15 - 80
+    penaltyLabel:setTextColor(0, 0, 255)
+    penaltyLabel.alpha = 0
+    grp:insert(penaltyLabel)
+
+    penaltyBar = display.newRect(100, display.viewableContentHeight - 30 - 80, 280, 30)
+    penaltyBar:setFillColor(0, 0, 255, 50)
+    penaltyBar.isVisible = false
+    grp:insert(penaltyBar)
 end
 
 function scene:create(event)
@@ -34,27 +61,6 @@ function scene:create(event)
     physics.setScale(60)
     physics.setGravity(0, 0)
     setUpDisplay(self.view)
-    display.setStatusBar(display.HiddenStatusBar)
-
-    rewardLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
-    rewardLabel.x = display.viewableContentWidth / 2
-    rewardLabel.y = 95
-    rewardLabel:setTextColor(0, 0, 0)
-    rewardLabel.alpha = 0
-
-    rewardBar = display.newRect(100, 80, 280, 30)
-    rewardBar:setFillColor(0, 0, 0, 50)
-    rewardBar.isVisible = false
-
-    penaltyLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
-    penaltyLabel.x = display.viewableContentWidth / 2
-    penaltyLabel.y = display.viewableContentHeight - 15 - 80
-    penaltyLabel:setTextColor(0, 0, 255)
-    penaltyLabel.alpha = 0
-
-    penaltyBar = display.newRect(100, display.viewableContentHeight - 30 - 80, 280, 30)
-    penaltyBar:setFillColor(0, 0, 255, 50)
-    penaltyBar.isVisible = false
 end
 
 function scene:show(event)
@@ -117,6 +123,11 @@ function scene:destroy(event)
 
 end
 
+local function switchScene(Scene)
+    local options = { effect = "crossFade", time = 200, params = { title = Scene } }
+    composer.gotoScene(Scene, options)
+end
+
 function createPlayer(x, y, width, height, rotation, visible)
     local playerCollisionFilter = { categoryBits = 2, maskBits = 5 }
     local playerBodyElement = { filter = playerCollisionFilter }
@@ -166,9 +177,16 @@ local function gameOver()
     end
     --
 
-    for _, object in pairs(objects) do
-        object.alpha = gameIsOver and 20 / 255 or 255 / 255
+    --for _, object in pairs(objects) do
+    --    object.alpha = gameIsOver and 20 / 255 or 255 / 255
+    --end
+
+    for _, v in pairs(objects) do
+        v:removeSelf()
     end
+    objects = { }
+
+    switchScene("scenes.gameover")
 end
 
 function ConstrainToScreen(object)

@@ -113,9 +113,7 @@ function scene:show(event)
     local phase = event.phase
     if (phase == "will") then
         CheckForUpdates(grp)
-
         spawn_particles = true
-
     elseif (phase == "did") then
         SpawnObject("food", 0, randomSpeed())
         SpawnObject("food", 0, -randomSpeed())
@@ -130,19 +128,13 @@ function scene:show(event)
 end
 
 function scene:hide(event)
-
     local phase = event.phase
     if (phase == "will") then
-
         spawn_particles = false
-
         for _, v in pairs(particles) do
             v:removeSelf()
         end
         particles = { }
-
-    elseif (phase == "did") then
-
     end
 end
 
