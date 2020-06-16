@@ -101,7 +101,7 @@ local function setUpDisplay(grp)
     highScoreLabel = display.newText("Highest Score: " .. tostring(game.highscore) or 0, ContentW / 2, ContentH / 2, native.systemFontBold, 15)
     highScoreLabel:setFillColor(colors.RGB("white"))
     highScoreLabel.x = ContentW / 2
-    highScoreLabel.y = (ContentH / 2) - (ContentH / 2) + 10
+    highScoreLabel.y = (ContentH / 2) - (ContentH / 2) + 20
     highScoreLabel.alpha = 0.20
     highScoreLabel.isVisible = false
     grp:insert(highScoreLabel)
@@ -131,7 +131,7 @@ local function setUpDisplay(grp)
         local line = display.newLine(border[k][1], border[k][2], border[k][3], border[k][4])
         line.strokeWidth = 10
         line.alpha = 1
-        line:setStrokeColor(colors.RGB("white"))
+        line:setStrokeColor(colors.RGB("red"))
         grp:insert(line)
     end
 end
