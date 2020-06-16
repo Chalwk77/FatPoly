@@ -37,25 +37,22 @@ function randomSpeed()
     return math.random(1, 2) / 10 * 1
 end
 
--- Creates and returns a new player.
 function createPlayer(x, y, width, height, rotation, visible)
     local playerCollisionFilter = { categoryBits = 2, maskBits = 5 }
     local playerBodyElement = { filter = playerCollisionFilter }
-
     local player = display.newRect(x, y, width, height)
-
-    player:setFillColor(colors.RGB(game.color))
-
     player.isBullet = true
     player.objectType = "player"
-    physics.addBody(player, "dynamic", playerBodyElement)
     player.rotation = rotation
+    player.isVisible = visible
     player.resize = false
     player.isSleepingAllowed = false
     player.x = x
     player.y = y
     player.anchorX = 0.5
     player.anchorY = 0.5
+    player:setFillColor(colors.RGB(game.color))
+    physics.addBody(player, "dynamic", playerBodyElement)
     return player
 end
 
@@ -82,13 +79,11 @@ function ConstrainToScreen(object)
     end
 end
 
--- Processes the touch events on the background. Moves the player object accordingly.
 function onTouch(event)
     if (event.phase == "began") then
         player.isFocus = true
         player.x0 = event.x - player.x
         player.y0 = event.y - player.y
-
     elseif player.isFocus then
         if (event.phase == "moved") then
             player.x = event.x - player.x0
@@ -101,7 +96,7 @@ function onTouch(event)
     return true
 end
 
-function SpawnObject(objectType, xVelocity, yVelocity)
+function SpawnObject(Type, xVelocity, yVelocity)
 
     local Object
     local sizeXY = math.random(10, 20)
@@ -126,27 +121,27 @@ function SpawnObject(objectType, xVelocity, yVelocity)
         startY = -sizeXY
     end
 
-    if (objectType == "food") or (objectType == "poison") then
+    if (Type == "food") or (Type == "poison") then
         Object = display.newRect(startX, startY, sizeXY, sizeXY)
         Object.sizeXY = sizeXY
-    elseif (objectType == "reward" or objectType == "penalty") then
+    elseif (Type == "reward" or Type == "penalty") then
         Object = display.newCircle(startX, startY, 15) -- Start obj.x, Start obj.y (radius)
         Object.sizeXY = 0
         AnimatePowerUp(Object)
     end
 
-    if (objectType == "poison") then
+    if (Type == "poison") then
         Object:setFillColor(colors.RGB("red"))
-    elseif (objectType == "food") then
+    elseif (Type == "food") then
         Object:setFillColor(colors.RGB("green"))
-    elseif (objectType == "reward") then
+    elseif (Type == "reward") then
         Object:setFillColor(colors.RGB("purple"))
     end
 
     Object.x = startX
     Object.y = startY
     Object.alpha = 1
-    Object.objectType = objectType
+    Object.objectType = Type
     Object.xVelocity = xVelocity
     Object.yVelocity = yVelocity
     Object.isFixedRotation = true
@@ -158,14 +153,14 @@ function SpawnObject(objectType, xVelocity, yVelocity)
     table.insert(particles, Object)
 end
 
-function gameSpecial(objectType)
+function gameSpecial(Type)
     local random_powerup = math.random(1, 4)
 
     local removeLoadingIcon = function()
         revolving_loading.isVisible = false
     end
 
-    if "reward" == objectType then
+    if (Type == "reward") then
         objectWasReward = true
         -- Decide which reward we are playing
         if (random_powerup == 1) then
@@ -290,157 +285,43 @@ function gameSpecial(objectType)
     rewardLabel.y = display.viewableContentHeight / 2 - 75
 end
 
--- We want to get notified when a collision occurs
---function onCollision(event)
---    if gameIsOver then
---        return
---    end
---    if "began" == event.phase then
---        local o
---        local ot
---        if "player" == event.object1.objectType then
---            o = event.object2
---            ot = event.object2.objectType
---        else
---            o = event.object1
---            ot = event.object1.objectType
---        end
---        if ("food" == ot and "no" == spawnConstraint) or "allyoucaneat" == spawnConstraint then
---            -- Increase the score
---            score = score + 1
---            points = points + 1
---            collisions = collisions + 1
---            -- ====================================================================================================================--
---            if collisions == settings["collisions"] then
---                invulnerable = false
---            end
---            scoreLabel.text = tostring(score)
---            sounds.play("onPickup")
---            for i = 1, #level do
---                if tonumber(score) == tonumber(level[i][3]) then
---                    sounds.play("onLevelup")
---                    break
---                end
---            end
---            if tonumber(score) >= tonumber(level[10][3]) then
---                wonTheGame = true
---                gameOverWon()
---            end
---            if player.width < 50 then
---                player.width = player.width + 1
---                player.height = player.height + 1
---                player.resize = true
---            end
---            o.isVisible = false
---        elseif "poison" == ot or "foodcontaminated" == spawnConstraint then
---            local options = { effect = "crossFade", time = 200 }
---            healthRemaining = healthRemaining - 25
---            if settings["delayCollision"] then
---                if (invulnerable == false) then
---                    if healthRemaining <= -25 then
---                        current_level = levelNum
---                        gameisrunning = false
---                        canSpawnItems = false
---                        gameIsOver = true
---                        OnGameEnd()
---                        composer.gotoScene('scenes.gameover', options)
---                        if revolving_loading then
---                            revolving_loading.isVisible = false
---                        end
---                    elseif healthRemaining >= 0 then
---                        sounds.play("onDamage")
---                        hitPoints = display.newText("-" .. healthRemaining, 0, 0, native.systemFontBold, 18)
---                        hitPoints.x = player.x + 45
---                        hitPoints.y = player.y
---                        hitPoints:setFillColor(255, 0, 0)
---                        hpTimer = transition.to(hitPoints, { time = 450, alpha = 0, x = player.x + 25, y = player.y })
---                        -- disabled for now
---                        --plTimer = transition.to(player, { time = 250, alpha = 0, iterations = 2, onComplete = function(player) player.alpha = 1 end})
---                        local hitDisplay = display.newImageRect('images/particle effects/hit_sparks.png', 180, 182)
---                        hitDisplay.x, hitDisplay.y = player.x, player.y
---                        local fromScale, toScale = 0.3, 0.7
---                        hitDisplay:scale(fromScale, fromScale)
---                        hitDisplay:setFillColor(1, 0.9, 0.5)
---                        transition.to(hitDisplay, { time = 250, xScale = toScale, yScale = toScale, alpha = 0.30, onComplete = function(object)
---                            object:removeSelf()
---                        end })
---                    end
---                end
---            else
---                if healthRemaining <= -25 then
---                    current_level = levelNum
---                    OnGameEnd()
---                    canSpawnItems = false
---                    composer.gotoScene('scenes.gameover', options)
---                    if revolving_loading then
---                        revolving_loading.isVisible = false
---                    end
---                    gameisrunning = false
---                    gameIsOver = true
---                elseif healthRemaining >= 0 then
---                    sounds.play("onDamage")
---                end
---            end
---            -- Object type is "reward" or "penalty"
---        elseif "reward" == ot or "penalty" == ot then
---            if settings["delayCollision"] then
---                if (invulnerable == false) then
---                    sounds.play("onPickup")
---                    o.isVisible = false
---                    gameSpecial(ot)
---                else
---                    -- delay collision
---                end
---            else
---                sounds.play("onPickup")
---                o.isVisible = false
---                gameSpecial(ot)
---            end
---        end
---        -- Particle Effects --
---        if settings["delayCollision"] then
---            if (invulnerable == false) then
---                if ("food" == ot and "no" == spawnConstraint) then
---                    local index = math.random(1, 5)
---                    local foodParticle = display.newImageRect('images/particle effects/' .. index .. '.png', specs[index].w, specs[index].h)
---                    foodParticle.x, foodParticle.y = player.x, player.y
---                    local fromScale, toScale = math.random(0.1, 0.2), math.random(1, 2)
---                    foodParticle:scale(fromScale, fromScale)
---                    foodParticle:setFillColor(1, 0.9, 0.5)
---                    transition.to(foodParticle, { time = math.random(200, 400), xScale = toScale, yScale = toScale, alpha = 0.15, onComplete = function(object)
---                        object:removeSelf()
---                    end })
---                end
---                if ("reward" == ot) then
---                    sounds.play("onPowerup")
---                    local index = math.random(1, 5)
---                    local rewardParticle = display.newImageRect('images/particle effects/onPowerup.png', specs[index].w, specs[index].h)
---                    rewardParticle.x, rewardParticle.y = player.x, player.y
---                    local fromScale, toScale = math.random(0.1, 0.2), math.random(1, 2)
---                    rewardParticle:scale(fromScale, fromScale)
---                    rewardParticle:setFillColor(1, 0.9, 0.5)
---                    transition.to(rewardParticle, { time = math.random(200, 400), xScale = toScale, yScale = toScale, alpha = 0.50, onComplete = function(object)
---                        object:removeSelf()
---                    end })
---                elseif ("penalty" == ot) then
---                    sounds.play("onPenalty")
---                    local index = math.random(1, 5)
---                    local penaltyParticle = display.newImageRect('images/particle effects/onPenalty.png', specs[index].w, specs[index].h)
---                    penaltyParticle.x, penaltyParticle.y = player.x, player.y
---                    local fromScale, toScale = math.random(0.1, 0.2), math.random(1, 2)
---                    penaltyParticle:scale(fromScale, fromScale)
---                    penaltyParticle:setFillColor(1, 0.9, 0.5)
---                    transition.to(penaltyParticle, { time = math.random(200, 400), xScale = toScale, yScale = toScale, alpha = 0.75, onComplete = function(object)
---                        object:removeSelf()
---                    end })
---                end
---            end
---        end
---    end
---end
+function onCollision(event)
+    if (event.phase == "began") then
+        local ot, o
+
+        if (event.object1.objectTyp == "player") then
+            o = event.object2
+            ot = event.object2.objectType
+        else
+            o = event.object1
+            ot = event.object1.objectType
+        end
+
+        if (ot == "food" and spawnConstraint == "no") or (spawnConstraint == "allyoucaneat") then
+            sounds.play("onPickup")
+            if (player.width < 50) then
+                player.width = player.width + 1
+                player.height = player.height + 1
+                player.resize = true
+            end
+            o.isVisible = false
+        elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
+            healthRemaining = healthRemaining - 25
+            if healthRemaining <= -25 then
+                -- game over
+            elseif healthRemaining >= 0 then
+                sounds.play("onDamage")
+                -- on damage?
+            end
+        elseif (ot == "reward" or ot == "penalty") then
+            sounds.play("onPickup")
+            o.isVisible = false
+            -- gameSpecial(ot)
+        end
+    end
+end
 
 function OnTick(event)
-
     if (player.resize) then
         local player2 = createPlayer(player.x, player.y, player.width, player.height, player.rotation, player.isVisible)
         if (player.isFocus) then
@@ -557,10 +438,10 @@ physics.start()
 physics.setScale(60)
 physics.setGravity(0, 0)
 
-player = createPlayer(display.viewableContentWidth / 2, display.viewableContentHeight / 2, 20, 20, 0, false)
+player = createPlayer(display.viewableContentWidth / 2, display.viewableContentHeight / 2, 20, 20, 0, true)
 
-Runtime:addEventListener("enterFrame", OnTick);
---Runtime:addEventListener("collision", onCollision)
+Runtime:addEventListener("enterFrame", OnTick)
+Runtime:addEventListener("collision", onCollision)
 
 -- Listener setup
 scene:addEventListener("create", scene)

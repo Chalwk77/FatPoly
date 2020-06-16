@@ -105,7 +105,7 @@ end
 
 function scene:create()
     setUpDisplay(self.view)
-    sounds.playStream('menu_music')
+    --sounds.playStream('menu_music')
 end
 
 function scene:show(event)
