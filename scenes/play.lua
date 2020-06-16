@@ -14,6 +14,8 @@ local score = 0
 
 local tPrevious = system.getTimer()
 
+local border_group = display.newGroup()
+
 local objects = { }
 
 local health = { }
@@ -111,6 +113,27 @@ local function setUpDisplay(grp)
     levelLabel.alpha = 0.20
     levelLabel.isVisible = false
     grp:insert(levelLabel)
+
+    local topY = display.screenOriginY
+    local bottomY = (display.contentHeight - display.screenOriginY)
+    local leftX = display.screenOriginX
+    local rightX = (display.contentWidth - display.screenOriginX)
+    local screenW = (rightX - leftX)
+
+    local border = {
+        top = { leftX + screenW, topY, rightX - screenW, topY },
+        bottom = { leftX + screenW, bottomY, rightX - screenW, bottomY },
+        left = { 0, topY, 0, bottomY },
+        right = { leftX + screenW, topY, leftX + screenW, bottomY }
+    }
+
+    for k, _ in pairs(border) do
+        local line = display.newLine(border[k][1], border[k][2], border[k][3], border[k][4])
+        line.strokeWidth = 10
+        line.alpha = 1
+        line:setStrokeColor(colors.RGB("white"))
+        grp:insert(line)
+    end
 end
 
 function scene:create(event)
@@ -183,7 +206,7 @@ function scene:show(event)
 end
 
 function scene:hide(event)
-
+    --border_group:isVisible = false
 end
 
 function scene:destroy(event)
@@ -264,18 +287,17 @@ local function gameOver()
 end
 
 function ConstrainToScreen(object)
-    local screen_offset = 1
-    if (object.x < object.width) then
-        object.x = object.width / screen_offset
+    if (object.x < object.width) - object.width / 2 then
+        object.x = (object.width / 2)
     end
-    if (object.x > ContentW - object.width) then
-        object.x = ContentW - object.width / screen_offset
+    if (object.x > ContentW - object.width) + object.width / 2 then
+        object.x = (ContentW - object.width / 2)
     end
-    if (object.y < object.height) then
-        object.y = object.height / screen_offset
+    if (object.y < object.height) - object.height / 2 then
+        object.y = (object.height / 2)
     end
-    if (object.y > ContentH - object.height) then
-        object.y = ContentH - object.height / screen_offset
+    if (object.y > ContentH - object.height) + object.height / 2 then
+        object.y = (ContentH - object.height / 2)
     end
 end
 
