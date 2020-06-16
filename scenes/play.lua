@@ -34,8 +34,6 @@ local scene = composer.newScene()
 local ContentW = display.viewableContentWidth
 local ContentH = display.viewableContentHeight
 
-local borders = { }
-
 local function UpdateStats()
     local path = system.pathForFile(stats_file, system.DocumentsDirectory)
     local content
@@ -135,7 +133,6 @@ local function setUpDisplay(grp)
         line.strokeWidth = 15
         line.alpha = 0.50
         line:setStrokeColor(colors.RGB(color))
-        borders[k] = line
         grp:insert(line)
     end
 end
