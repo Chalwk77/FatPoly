@@ -122,14 +122,12 @@ local function setUpDisplay(grp)
         right = { leftX + screenW, topY, leftX + screenW, bottomY }
     }
 
-    local lvl = game.current_level
-    local color = game.levels[lvl].params.border_color
     local i = 1
     for k, _ in pairs(border) do
         local line = display.newLine(border[k][1], border[k][2], border[k][3], border[k][4])
         line.strokeWidth = 15
         line.alpha = 0.50
-        line:setStrokeColor(colors.RGB(color))
+        line:setStrokeColor(colors.RGB("red"))
         grp:insert(line)
         borders[i] = line
         i = i + 1
@@ -604,9 +602,12 @@ local function onCollision(event)
                 game.levels[new_level].enabled = true
                 sounds.play("onLevelup")
 
-                local color = game.levels[new_level].params.border_color
+                local R = math.random(0, 255)
+                local G = math.random(0, 255)
+                local B = math.random(0, 255)
+
                 for i = 1, 4 do
-                    borders[i]:setStrokeColor(colors.RGB(color))
+                    borders[i]:setStrokeColor(R / 255, G / 255, B / 255, 0.50)
                 end
             end
 
