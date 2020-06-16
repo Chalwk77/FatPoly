@@ -134,19 +134,9 @@ function scene:show(event)
     local phase = event.phase
     if (phase == "will") then
 
-    elseif (phase == "did") then
-
-        highscore = highscore or GetHighScore()
-
-        Spawn("food", 0, randomSpeed())
-        Spawn("food", 0, -randomSpeed())
-        Spawn("food", randomSpeed(), 0)
-        Spawn("food", -randomSpeed(), 0)
-        Spawn("poison", 0, randomSpeed())
-        Spawn("poison", 0, -randomSpeed())
-        Spawn("poison", randomSpeed(), 0)
-        Spawn("poison", -randomSpeed(), 0)
-        Spawn("reward", randomSpeed(), 0)
+        score = 0
+        scoreLabel.text = tostring(score)
+        gameIsOver = false
 
         player = createPlayer(ContentW / 2, ContentH / 2, 20, 20, 0, true)
 
@@ -157,13 +147,6 @@ function scene:show(event)
         player.y = ContentH / 2
         player.resize = true
         speedFactor = 1
-        gameIsOver = false
-
-        score = 0
-
-        for _, object in pairs(objects) do
-            object.isVisible = false
-        end
 
         local rate = 500
         for i = 1, 5 do
@@ -179,6 +162,20 @@ function scene:show(event)
         health.hearts[1].isVisible = true
         health.hearts.current = 1
         health.amount = 100
+
+    elseif (phase == "did") then
+
+        highscore = highscore or GetHighScore()
+
+        Spawn("food", 0, randomSpeed())
+        Spawn("food", 0, -randomSpeed())
+        Spawn("food", randomSpeed(), 0)
+        Spawn("food", -randomSpeed(), 0)
+        Spawn("poison", 0, randomSpeed())
+        Spawn("poison", 0, -randomSpeed())
+        Spawn("poison", randomSpeed(), 0)
+        Spawn("poison", -randomSpeed(), 0)
+        Spawn("reward", randomSpeed(), 0)
 
         HeartsAnimation()
 
@@ -249,15 +246,13 @@ local function gameOver()
     end
     --
 
-    --for _, object in pairs(objects) do
-    --    object.alpha = gameIsOver and 20 / 255 or 255 / 255
-    --end
-
+    -- Remove objects:
     for _, v in pairs(objects) do
         v:removeSelf()
     end
     objects = { }
 
+    -- Update scores:
     if (score > highscore) then
         highscore = score
         sounds.play("onWin")
@@ -265,8 +260,9 @@ local function gameOver()
     else
         sounds.play("onFailed")
     end
-
     highscore = nil
+
+    -- Switch to GAME OVER SCENE:
     switchScene("scenes.gameover")
 end
 
@@ -309,7 +305,6 @@ function Spawn(objectType, xVelocity, yVelocity)
     if (gameIsOver) then
         return
     else
-
         local Object
         local sizeXY = math.random(10, 20)
         local startX, startY
