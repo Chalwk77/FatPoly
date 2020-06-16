@@ -108,6 +108,7 @@ function scene:create()
     --sounds.playStream('menu_music')
 end
 
+local borders = { }
 function scene:show(event)
     local grp = self.view
     local phase = event.phase

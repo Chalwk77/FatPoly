@@ -11,11 +11,9 @@ local spawnConstraint = "no"
 local speedFactor = 1
 
 local score = 0
-
 local tPrevious = system.getTimer()
-
+local borders = { }
 local objects = { }
-
 local health = { }
 health.hearts = { }
 health.bar = require('modules.healthbar')
@@ -26,7 +24,6 @@ local sounds = require('libraries.sounds')
 local colors = require('classes.colors-rgb')
 local composer = require('composer')
 local scene = composer.newScene()
-
 
 --
 -- COMMON SCREEN COORDINATES:
@@ -127,13 +124,15 @@ local function setUpDisplay(grp)
 
     local lvl = game.current_level
     local color = game.levels[lvl].params.border_color
-
+    local i = 1
     for k, _ in pairs(border) do
         local line = display.newLine(border[k][1], border[k][2], border[k][3], border[k][4])
         line.strokeWidth = 15
         line.alpha = 0.50
         line:setStrokeColor(colors.RGB(color))
         grp:insert(line)
+        borders[i] = line
+        i = i + 1
     end
 end
 
@@ -603,6 +602,11 @@ local function onCollision(event)
                 game.current_level = new_level
                 game.levels[new_level].enabled = true
                 sounds.play("onLevelup")
+
+                local color = game.levels[new_level].params.border_color
+                for i = 1, 4 do
+                    borders[i]:setStrokeColor(colors.RGB(color))
+                end
             end
 
         elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
