@@ -3,7 +3,7 @@
 local composer = require('composer')
 local sounds = require('libraries.sounds')
 local json = require("libraries.json")
-local stats_file = "stats.json"
+stats_file = "stats.json"
 
 game = { }
 app_version = "1.0.0"
@@ -60,9 +60,8 @@ function CheckFile()
         local data = json:decode(content)
         if (data == nil) then
             data = {
-                score = 0,
-                highest_score = 0,
                 color = "green",
+                highscore = 0,
                 levels = {
                     [1] = true,
                     [2] = false,

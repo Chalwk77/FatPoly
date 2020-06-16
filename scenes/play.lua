@@ -3,23 +3,71 @@ local rewardLabel
 local penaltyLabel
 local rewardBar
 local penaltyBar
+local scoreLabel
+local highScoreLabel
 local player
 local spawnConstraint = "no"
 local speedFactor = 1
+
+local score = 0
+local highscore
+
 local tPrevious = system.getTimer()
+
 local objects = { }
 
 local health = { }
 health.hearts = { }
 health.bar = require('modules.healthbar')
 
+local json = require("libraries.json")
 local physics = require("physics")
 local sounds = require('libraries.sounds')
 local colors = require('classes.colors-rgb')
 local composer = require('composer')
 local scene = composer.newScene()
 
+
+--
+-- COMMON SCREEN COORDINATES:
+--
+local ContentW = display.viewableContentWidth
+local ContentH = display.viewableContentHeight
+
+local function GetHighScore()
+    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
+
+    local content
+    local file = io.open(path, "r")
+    if (file ~= nil) then
+        content = file:read("*all")
+        io.close(file)
+    end
+
+    return json:decode(content).highscore
+end
+
+local function SaveHighScore()
+    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
+
+    local content
+    local file = io.open(path, "r")
+    if (file ~= nil) then
+        content = file:read("*all")
+        io.close(file)
+    end
+
+    local file = assert(io.open(path, "w"))
+    if (file) then
+        local data = json:decode(content)
+        data.highscore = score
+        file:write(json:encode_pretty(data))
+        io.close(file)
+    end
+end
+
 local function setUpDisplay(grp)
+
     display.setStatusBar(display.HiddenStatusBar)
 
     local background = display.newImage(grp, "images/backgrounds/background.png")
@@ -32,10 +80,11 @@ local function setUpDisplay(grp)
     grp:insert(background)
 
     rewardLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
-    rewardLabel.x = display.viewableContentWidth / 2
+    rewardLabel.x = ContentW / 2
     rewardLabel.y = 95
     rewardLabel:setTextColor(0, 0, 0)
     rewardLabel.alpha = 0
+    rewardLabel.isVisible = false
     grp:insert(rewardLabel)
 
     rewardBar = display.newRect(100, 80, 280, 30)
@@ -44,16 +93,34 @@ local function setUpDisplay(grp)
     grp:insert(rewardBar)
 
     penaltyLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
-    penaltyLabel.x = display.viewableContentWidth / 2
-    penaltyLabel.y = display.viewableContentHeight - 15 - 80
+    penaltyLabel.x = ContentW / 2
+    penaltyLabel.y = ContentH - 15 - 80
     penaltyLabel:setTextColor(0, 0, 255)
     penaltyLabel.alpha = 0
+    penaltyLabel.isVisible = false
     grp:insert(penaltyLabel)
 
-    penaltyBar = display.newRect(100, display.viewableContentHeight - 30 - 80, 280, 30)
+    penaltyBar = display.newRect(100, ContentH - 30 - 80, 280, 30)
     penaltyBar:setFillColor(0, 0, 255, 50)
     penaltyBar.isVisible = false
     grp:insert(penaltyBar)
+
+    scoreLabel = display.newText(tostring(score), ContentW / 2, ContentH / 2, native.systemFontBold, 120)
+    scoreLabel:setFillColor(colors.RGB("white"))
+    scoreLabel.x = display.viewableContentWidth / 2
+    scoreLabel.y = display.viewableContentHeight / 2
+    scoreLabel.alpha = 0.20
+    scoreLabel.isVisible = false
+    grp:insert(scoreLabel)
+
+    highscore = GetHighScore()
+    highScoreLabel = display.newText("Highest Score: " .. tostring(highscore) or 0, ContentW / 2, ContentH / 2, native.systemFontBold, 15)
+    highScoreLabel:setFillColor(colors.RGB("white"))
+    highScoreLabel.x = ContentW / 2
+    highScoreLabel.y = (ContentH / 2) - (ContentH / 2) + 10
+    highScoreLabel.alpha = 0.20
+    highScoreLabel.isVisible = false
+    grp:insert(highScoreLabel)
 end
 
 function scene:create(event)
@@ -69,6 +136,8 @@ function scene:show(event)
 
     elseif (phase == "did") then
 
+        highscore = highscore or GetHighScore()
+
         Spawn("food", 0, randomSpeed())
         Spawn("food", 0, -randomSpeed())
         Spawn("food", randomSpeed(), 0)
@@ -79,16 +148,18 @@ function scene:show(event)
         Spawn("poison", -randomSpeed(), 0)
         Spawn("reward", randomSpeed(), 0)
 
-        player = createPlayer(display.viewableContentWidth / 2, display.viewableContentHeight / 2, 20, 20, 0, true)
+        player = createPlayer(ContentW / 2, ContentH / 2, 20, 20, 0, true)
 
         player.health = 100
         player.width = 20
         player.height = 20
-        player.x = display.viewableContentWidth / 2
-        player.y = display.viewableContentHeight / 2
+        player.x = ContentW / 2
+        player.y = ContentH / 2
         player.resize = true
         speedFactor = 1
         gameIsOver = false
+
+        score = 0
 
         for _, object in pairs(objects) do
             object.isVisible = false
@@ -97,8 +168,8 @@ function scene:show(event)
         local rate = 500
         for i = 1, 5 do
             health.hearts[i] = display.newImageRect("images/backgrounds/heart" .. tostring(i) .. ".png", 12, 12)
-            health.hearts[i].x = display.viewableContentWidth / 2 + 170
-            health.hearts[i].y = display.viewableContentHeight / 2 - 120
+            health.hearts[i].x = ContentW / 2 + 170
+            health.hearts[i].y = ContentH / 2 - 120
             health.hearts[i].alpha = 0.75
             health.hearts[i].isVisible = false
             health.hearts[i].rate = rate
@@ -111,6 +182,8 @@ function scene:show(event)
 
         HeartsAnimation()
 
+        scoreLabel.isVisible = true
+        highScoreLabel.isVisible = true
         sounds.playStream('game_music')
     end
 end
@@ -162,7 +235,6 @@ end
 
 local function gameOver()
     gameIsOver = true
-    sounds.play("onFailed")
 
     rewardBar.isVisible = false
     penaltyLabel.alpha = 0
@@ -186,6 +258,15 @@ local function gameOver()
     end
     objects = { }
 
+    if (score > highscore) then
+        highscore = score
+        sounds.play("onWin")
+        SaveHighScore()
+    else
+        sounds.play("onFailed")
+    end
+
+    highscore = nil
     switchScene("scenes.gameover")
 end
 
@@ -194,14 +275,14 @@ function ConstrainToScreen(object)
     if (object.x < object.width) then
         object.x = object.width / screen_offset
     end
-    if (object.x > display.viewableContentWidth - object.width) then
-        object.x = display.viewableContentWidth - object.width / screen_offset
+    if (object.x > ContentW - object.width) then
+        object.x = ContentW - object.width / screen_offset
     end
     if (object.y < object.height) then
         object.y = object.height / screen_offset
     end
-    if (object.y > display.viewableContentHeight - object.height) then
-        object.y = display.viewableContentHeight - object.height / screen_offset
+    if (object.y > ContentH - object.height) then
+        object.y = ContentH - object.height / screen_offset
     end
 end
 
@@ -373,8 +454,8 @@ local function gameSpecial(objectType)
             transition.to(penaltyBar, { time = 5000, width = 0, onComplete = closure })
         end
     end
-    rewardLabel.x = display.viewableContentWidth / 2
-    penaltyLabel.x = display.viewableContentWidth / 2
+    rewardLabel.x = ContentW / 2
+    penaltyLabel.x = ContentW / 2
 end
 
 local function OnTick(event)
@@ -476,6 +557,8 @@ local function onCollision(event)
         end
         if ("food" == ot and spawnConstraint == "no") or (spawnConstraint == "allyoucaneat") then
             sounds.play("onPickup")
+            score = score + 1
+            scoreLabel.text = tostring(score)
             if player.width < 50 then
                 player.width = player.width + 1
                 player.height = player.height + 1
@@ -485,14 +568,12 @@ local function onCollision(event)
         elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
             sounds.play("onDamage")
             health.amount = health.amount - 25
-
             health.hearts[health.hearts.current].isVisible = false
             health.hearts.current = health.hearts.current + 1
             if (health.hearts.current > 5) then
                 health.hearts.current = 5
             end
             health.hearts[health.hearts.current].isVisible = true
-
             if (health.amount <= -25) then
                 gameOver()
             end

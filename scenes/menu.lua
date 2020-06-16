@@ -30,14 +30,13 @@ end
 
 local function setUpDisplay(grp)
 
-    local screen_adjustment = 0.5
     local background = display.newImage("images/backgrounds/background.png")
-    background.xScale = (screen_adjustment * background.contentWidth) / background.contentWidth
+    background.xScale = (background.contentWidth * 0.5) / background.contentWidth
     background.yScale = background.xScale
     background.x = centerX
     background.y = centerY - 50
     background:scale(0.6, 0.6)
-    background.alpha = 0.75
+    background.alpha = 0.30
     grp:insert(background)
 
     local logo = display.newImage("images/backgrounds/logo.png")

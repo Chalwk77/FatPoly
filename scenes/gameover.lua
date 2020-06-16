@@ -36,7 +36,6 @@ local function setUpDisplay(grp)
     title_logo:scale(0.6, 0.6)
     grp:insert(title_logo)
 
-    local spacing = 40
     local menuBtn = widget.newButton({
         label = "RETURN TO MENU",
         id = "scenes.menu",
