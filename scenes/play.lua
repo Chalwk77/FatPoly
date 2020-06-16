@@ -9,6 +9,10 @@ local speedFactor = 1
 local tPrevious = system.getTimer()
 local objects = { }
 
+local health = { }
+health.hearts = { }
+health.bar = require('modules.healthbar')
+
 local physics = require("physics")
 local sounds = require('libraries.sounds')
 local colors = require('classes.colors-rgb')
@@ -58,6 +62,7 @@ function scene:show(event)
     if (phase == "will") then
 
     elseif (phase == "did") then
+
         Spawn("food", 0, randomSpeed())
         Spawn("food", 0, -randomSpeed())
         Spawn("food", randomSpeed(), 0)
@@ -82,6 +87,23 @@ function scene:show(event)
         for _, object in pairs(objects) do
             object.isVisible = false
         end
+
+        local rate = 500
+        for i = 1, 5 do
+            health.hearts[i] = display.newImageRect("images/backgrounds/heart" .. tostring(i) .. ".png", 12, 12)
+            health.hearts[i].x = display.viewableContentWidth / 2 + 170
+            health.hearts[i].y = display.viewableContentHeight / 2 - 120
+            health.hearts[i].alpha = 0.75
+            health.hearts[i].isVisible = false
+            health.hearts[i].rate = rate
+            rate = rate - 100
+        end
+
+        health.hearts[1].isVisible = true
+        health.hearts.current = 1
+        health.amount = 100
+
+        HeartsAnimation()
 
         sounds.playStream('game_music')
     end
@@ -136,6 +158,13 @@ local function gameOver()
     penaltyBar.isVisible = false
 
     player.isVisible = false
+
+    -- HIDE: health bar & hearts --
+    health.bar.isVisible = false
+    for i = 1, 5 do
+        health.hearts[i].isVisible = false
+    end
+    --
 
     for _, object in pairs(objects) do
         object.alpha = gameIsOver and 20 / 255 or 255 / 255
@@ -267,7 +296,7 @@ local function gameSpecial(objectType)
                 rewardBar.isVisible = false
             end
             transition.to(rewardBar, { time = 5000, width = 0, onComplete = closure })
-        else
+        elseif (r == 3) then
             if (speedFactor ~= 1) then
                 return
             end
@@ -306,7 +335,7 @@ local function gameSpecial(objectType)
                 penaltyBar.isVisible = false;
             end
             transition.to(penaltyBar, { time = 5000, width = 0, onComplete = closure })
-        else
+        elseif (r == 3) then
             if (speedFactor ~= 1) then
                 return
             end
@@ -335,16 +364,22 @@ local function OnTick(event)
         return
     end
 
-    if (player) and (player.resize) then
-        local player2 = createPlayer(player.x, player.y, player.width, player.height, player.rotation, player.isVisible)
-        if (player.isFocus) then
-            player2.isFocus = player.isFocus
-            player2.x0 = player.x0
-            player2.y0 = player.y0
+    if (player) then
+
+        if (player.resize) then
+            local player2 = createPlayer(player.x, player.y, player.width, player.height, player.rotation, player.isVisible)
+            if (player.isFocus) then
+                player2.isFocus = player.isFocus
+                player2.x0 = player.x0
+                player2.y0 = player.y0
+            end
+            player2.resize = false
+            player:removeSelf()
+            player = player2
         end
-        player2.resize = false
-        player:removeSelf()
-        player = player2
+
+        -- Display Health Bar:
+        health.bar.new(health.amount)
     end
 
     local tDelta = event.time - tPrevious
@@ -430,13 +465,46 @@ local function onCollision(event)
             end
             o.isVisible = false
         elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
-            gameOver()
+            sounds.play("onDamage")
+            health.amount = health.amount - 25
+
+            health.hearts[health.hearts.current].isVisible = false
+            health.hearts.current = health.hearts.current + 1
+            if (health.hearts.current > 5) then
+                health.hearts.current = 5
+            end
+            health.hearts[health.hearts.current].isVisible = true
+
+            if (health.amount <= -25) then
+                gameOver()
+            end
         elseif (ot == "reward") or (ot == "penalty") then
             sounds.play("onPowerup")
             o.isVisible = false
             gameSpecial(ot)
         end
     end
+end
+
+function HeartsAnimation()
+
+    local obj = health.hearts[health.hearts.current]
+    local scaleUp = function()
+        transition.to(obj, {
+            time = obj.rate,
+            alpha = 0.20,
+            xScale = 1,
+            yScale = 1,
+            onComplete = HeartsAnimation
+        })
+    end
+    transition.to(obj, {
+        time = 100,
+        alpha = 1,
+        xScale = 2,
+        yScale = 2,
+        onComplete = scaleUp
+    })
 end
 
 Runtime:addEventListener("collision", onCollision)

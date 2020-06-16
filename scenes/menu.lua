@@ -202,6 +202,9 @@ function SpawnObject(objectType, xVelocity, yVelocity)
         Object.yVelocity = yVelocity
         Object.isFixedRotation = true
 
+        Object:setStrokeColor(colors.RGB("white"))
+        Object.strokeWidth = 1
+
         local collisionFilter = { categoryBits = 4, maskBits = 2 }
         local body = { filter = collisionFilter, isSensor = true }
         physics.addBody(Object, body)
