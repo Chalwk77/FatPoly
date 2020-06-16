@@ -122,7 +122,6 @@ function scene:show(event)
             io.close(file)
         end
         game = json:decode(content)
-
         CheckForUpdates(grp)
         spawn_particles = true
     elseif (phase == "did") then

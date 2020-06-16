@@ -7,6 +7,10 @@ local scoreLabel
 local highScoreLabel
 local levelLabel
 local player
+
+local pW = 20
+local pH = 20
+
 local spawnConstraint = "no"
 local speedFactor = 1
 
@@ -150,14 +154,7 @@ function scene:show(event)
         gameIsOver = false
 
         -- Create a new player:
-        player = createPlayer(ContentW / 2, ContentH / 2, 20, 20, 0, true)
-
-        player.health = 100
-        player.width = 20
-        player.height = 20
-        player.x = ContentW / 2
-        player.y = ContentH / 2
-        player.resize = true
+        player = createPlayer(ContentW / 2, ContentH / 2, pW, pH, 0, true)
         speedFactor = 1
 
         local rate = 500
@@ -217,6 +214,9 @@ local function switchScene(Scene)
 end
 
 function createPlayer(x, y, width, height, rotation, visible)
+
+    print(width, height)
+
     local playerCollisionFilter = { categoryBits = 2, maskBits = 5 }
     local playerBodyElement = { filter = playerCollisionFilter }
     local player = display.newRect(x, y, width, height)
@@ -321,66 +321,67 @@ end
 function Spawn(objectType, xVelocity, yVelocity)
     if (gameIsOver) then
         return
-    else
-        local Object
-        local sizeXY = math.random(10, 20)
-        local startX, startY
+    end
 
-        if (xVelocity == 0) then
-            startX = math.random(sizeXY, display.contentWidth - sizeXY)
+    local Object
+    local sizeXY = math.random(5, 20)
+    local startX, startY
+
+    if (xVelocity == 0) then
+        startX = math.random(sizeXY, display.contentWidth - sizeXY)
+    end
+    if (xVelocity < 0) then
+        startX = display.contentWidth
+    end
+    if (xVelocity > 0) then
+        startX = -sizeXY
+    end
+
+    if (yVelocity == 0) then
+        startY = math.random(sizeXY, display.contentHeight - sizeXY)
+    end
+    if (yVelocity < 0) then
+        startY = display.contentHeight
+    end
+    if (yVelocity > 0) then
+        startY = -sizeXY
+    end
+
+    if (objectType == "food") or (objectType == "poison") then
+        Object = display.newRect(startX, startY, sizeXY, sizeXY)
+        Object.sizeXY = sizeXY
+    elseif (objectType == "reward" or objectType == "penalty") then
+        local Size = math.random(10, 15)
+        Object = display.newCircle(startX, startY, Size)
+        Object.sizeXY = 0
+    end
+
+    if (Object) then
+
+        if (objectType == "poison") then
+            Object:setFillColor(colors.RGB("red"))
+        elseif (objectType == "food") then
+            Object:setFillColor(colors.RGB("green"))
+        elseif (objectType == "reward") then
+            Object:setFillColor(colors.RGB("purple"))
         end
-        if (xVelocity < 0) then
-            startX = display.contentWidth
-        end
-        if (xVelocity > 0) then
-            startX = -sizeXY
-        end
 
-        if (yVelocity == 0) then
-            startY = math.random(sizeXY, display.contentHeight - sizeXY)
-        end
-        if (yVelocity < 0) then
-            startY = display.contentHeight
-        end
-        if (yVelocity > 0) then
-            startY = -sizeXY
-        end
+        Object.x = startX
+        Object.y = startY
+        Object.alpha = (gameIsOver and 20 or 255)
+        Object.objectType = objectType
+        Object.xVelocity = xVelocity
+        Object.yVelocity = yVelocity
+        Object.isFixedRotation = true
 
-        if (objectType == "food") or (objectType == "poison") then
-            Object = display.newRect(startX, startY, sizeXY, sizeXY)
-            Object.sizeXY = sizeXY
-        elseif (objectType == "reward" or objectType == "penalty") then
-            Object = display.newCircle(startX, startY, 15)
-            Object.sizeXY = 0
-        end
+        Object.strokeWidth = 1
+        Object:setStrokeColor(colors.RGB("white"))
 
-        if (Object) then
+        local collisionFilter = { categoryBits = 4, maskBits = 2 }
+        local body = { filter = collisionFilter, isSensor = true }
+        physics.addBody(Object, body)
 
-            if (objectType == "poison") then
-                Object:setFillColor(colors.RGB("red"))
-            elseif (objectType == "food") then
-                Object:setFillColor(colors.RGB("green"))
-            elseif (objectType == "reward") then
-                Object:setFillColor(colors.RGB("purple"))
-            end
-
-            Object.x = startX
-            Object.y = startY
-            Object.alpha = (gameIsOver and 20 or 255)
-            Object.objectType = objectType
-            Object.xVelocity = xVelocity
-            Object.yVelocity = yVelocity
-            Object.isFixedRotation = true
-
-            Object.strokeWidth = 1
-            Object:setStrokeColor(colors.RGB("white"))
-
-            local collisionFilter = { categoryBits = 4, maskBits = 2 }
-            local body = { filter = collisionFilter, isSensor = true }
-            physics.addBody(Object, body)
-
-            table.insert(objects, Object)
-        end
+        table.insert(objects, Object)
     end
 end
 
@@ -478,7 +479,13 @@ local function OnTick(event)
 
     if (player) then
         if (player.resize) then
-            local player2 = createPlayer(player.x, player.y, player.width, player.height, player.rotation, player.isVisible)
+
+            local weight_percentage = 1.500
+            local X, Y = player.x, player.y
+            local W = (player.width - weight_percentage)
+            local H = (player.height - weight_percentage)
+
+            local player2 = createPlayer(X, Y, W, H, player.rotation, player.isVisible)
             if (player.isFocus) then
                 player2.isFocus = player.isFocus
                 player2.x0 = player.x0
@@ -498,7 +505,7 @@ local function OnTick(event)
         -- Display Level Label:
         --
         local lvl = game.current_level
-        local required = game.levels[lvl].params.pts
+        local required = game.levels[lvl][2]
         levelLabel.text = "Level: " .. lvl .. "/" .. required
     end
 
@@ -584,14 +591,21 @@ local function onCollision(event)
             score = score + 1
             scoreLabel.text = tostring(score)
             if (player.width < 65) then
-                player.width = player.width + 1
-                player.height = player.height + 1
+                --player.width = player.width + 1
+                --player.height = player.height + 1
                 player.resize = true
             end
             o.isVisible = false
 
+            local R = math.random(0, 255)
+            local G = math.random(0, 255)
+            local B = math.random(0, 255)
+            for i = 1, 4 do
+                borders[i]:setStrokeColor(R / 255, G / 255, B / 255, 1)
+            end
+
             local current_level = game.current_level
-            local required = game.levels[current_level].params.pts
+            local required = game.levels[current_level][2]
 
             if (score == required) then
                 local new_level = current_level + 1
@@ -599,16 +613,8 @@ local function onCollision(event)
                     new_level = #game.levels
                 end
                 game.current_level = new_level
-                game.levels[new_level].enabled = true
+                game.levels[new_level][1] = true
                 sounds.play("onLevelup")
-
-                local R = math.random(0, 255)
-                local G = math.random(0, 255)
-                local B = math.random(0, 255)
-
-                for i = 1, 4 do
-                    borders[i]:setStrokeColor(R / 255, G / 255, B / 255, 0.50)
-                end
             end
 
         elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then

@@ -63,16 +63,16 @@ function CheckFile()
                 color = "default_color",
                 highscore = 0,
                 levels = {
-                    [1] = { enabled = true, params = { pts = 30 } },
-                    [2] = { enabled = false, params = { pts = 60 } },
-                    [3] = { enabled = false, params = { pts = 90 } },
-                    [4] = { enabled = false, params = { pts = 120 } },
-                    [5] = { enabled = false, params = { pts = 150 } },
-                    [6] = { enabled = false, params = { pts = 180 } },
-                    [7] = { enabled = false, params = { pts = 210 } },
-                    [8] = { enabled = false, params = { pts = 240 } },
-                    [9] = { enabled = false, params = { pts = 270 } },
-                    [10] = { enabled = false, params = { pts = 300 } },
+                    [1] = { true, 30 },
+                    [2] = { false, 60 },
+                    [3] = { false, 90 },
+                    [4] = { false, 120 },
+                    [5] = { false, 150 },
+                    [6] = { false, 180 },
+                    [7] = { false, 210 },
+                    [8] = { false, 240 },
+                    [9] = { false, 270 },
+                    [10] = { false, 300 },
                 }
             }
         end

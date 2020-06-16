@@ -17,7 +17,7 @@ local function switchScene(event)
 
     sounds.play("onTap")
 
-    if not (game.levels[level].enabled) then
+    if not (game.levels[level][1]) then
         toast.new("You haven't unlocked level " .. level, 1500, "red", "white")
         return
     end
@@ -122,7 +122,7 @@ function scene:show()
     local x, y = -2, 0
     local spacing = 100
     for i = 1, 10 do
-        if (game.levels[i].enabled) then
+        if (game.levels[i][1]) then
             padlock = display.newImage("images/backgrounds/padlock_unlocked.png")
         else
             padlock = display.newImage("images/backgrounds/padlock_locked.png")
