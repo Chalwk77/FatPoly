@@ -10,7 +10,6 @@ local spawnConstraint = "no"
 local speedFactor = 1
 
 local score = 0
-local highscore
 
 local tPrevious = system.getTimer()
 
@@ -34,34 +33,17 @@ local scene = composer.newScene()
 local ContentW = display.viewableContentWidth
 local ContentH = display.viewableContentHeight
 
-local function GetHighScore()
+local function UpdateStats()
     local path = system.pathForFile(stats_file, system.DocumentsDirectory)
-
     local content
     local file = io.open(path, "r")
     if (file ~= nil) then
         content = file:read("*all")
         io.close(file)
     end
-
-    return json:decode(content).highscore
-end
-
-local function SaveHighScore()
-    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
-
-    local content
-    local file = io.open(path, "r")
-    if (file ~= nil) then
-        content = file:read("*all")
-        io.close(file)
-    end
-
     local file = assert(io.open(path, "w"))
     if (file) then
-        local data = json:decode(content)
-        data.highscore = score
-        file:write(json:encode_pretty(data))
+        file:write(json:encode_pretty(game))
         io.close(file)
     end
 end
@@ -113,8 +95,7 @@ local function setUpDisplay(grp)
     scoreLabel.isVisible = false
     grp:insert(scoreLabel)
 
-    highscore = GetHighScore()
-    highScoreLabel = display.newText("Highest Score: " .. tostring(highscore) or 0, ContentW / 2, ContentH / 2, native.systemFontBold, 15)
+    highScoreLabel = display.newText("Highest Score: " .. tostring(game.highscore) or 0, ContentW / 2, ContentH / 2, native.systemFontBold, 15)
     highScoreLabel:setFillColor(colors.RGB("white"))
     highScoreLabel.x = ContentW / 2
     highScoreLabel.y = (ContentH / 2) - (ContentH / 2) + 10
@@ -138,6 +119,7 @@ function scene:show(event)
         scoreLabel.text = tostring(score)
         gameIsOver = false
 
+        -- Create a new player:
         player = createPlayer(ContentW / 2, ContentH / 2, 20, 20, 0, true)
 
         player.health = 100
@@ -161,12 +143,13 @@ function scene:show(event)
 
         health.hearts[1].isVisible = true
         health.hearts.current = 1
+
+        -- Initial player health:
         health.amount = 100
 
     elseif (phase == "did") then
 
-        highscore = highscore or GetHighScore()
-
+        -- Spawn initial food objects
         Spawn("food", 0, randomSpeed())
         Spawn("food", 0, -randomSpeed())
         Spawn("food", randomSpeed(), 0)
@@ -177,10 +160,14 @@ function scene:show(event)
         Spawn("poison", -randomSpeed(), 0)
         Spawn("reward", randomSpeed(), 0)
 
+        -- Start hearts animation:
         HeartsAnimation()
 
+        -- Show Score labels:
         scoreLabel.isVisible = true
         highScoreLabel.isVisible = true
+
+        -- Play Background music: (loop)
         sounds.playStream('game_music')
     end
 end
@@ -253,14 +240,14 @@ local function gameOver()
     objects = { }
 
     -- Update scores:
-    if (score > highscore) then
-        highscore = score
+    if (score > game.highscore) then
+        game.highscore = score
         sounds.play("onWin")
-        SaveHighScore()
     else
         sounds.play("onFailed")
     end
-    highscore = nil
+
+    UpdateStats()
 
     -- Switch to GAME OVER SCENE:
     switchScene("scenes.gameover")
@@ -538,6 +525,7 @@ local function OnTick(event)
 end
 
 local function onCollision(event)
+
     if (gameIsOver) then
         return
     end
@@ -554,12 +542,26 @@ local function onCollision(event)
             sounds.play("onPickup")
             score = score + 1
             scoreLabel.text = tostring(score)
-            if player.width < 50 then
+            if (player.width < 65) then
                 player.width = player.width + 1
                 player.height = player.height + 1
                 player.resize = true
             end
             o.isVisible = false
+
+            local current_level = game.current_level
+            local required = game.levels[current_level].requirements[1]
+
+            if (score == required) then
+                local new_level = current_level + 1
+                if (new_level == #game.levels) then
+                    new_level = #game.levels
+                end
+                game.current_level = new_level
+                game.levels[new_level].enabled = true
+                sounds.play("onLevelup")
+            end
+
         elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
             sounds.play("onDamage")
             health.amount = health.amount - 25

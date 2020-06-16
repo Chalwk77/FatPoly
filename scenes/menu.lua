@@ -1,6 +1,7 @@
 local composer = require('composer')
 local scene = composer.newScene()
 
+local json = require("libraries.json")
 local widget = require('widget')
 local sounds = require('libraries.sounds')
 local physics = require("physics")
@@ -111,6 +112,16 @@ function scene:show(event)
     local grp = self.view
     local phase = event.phase
     if (phase == "will") then
+
+        local path = system.pathForFile(stats_file, system.DocumentsDirectory)
+        local content
+        local file = io.open(path, "r")
+        if (file ~= nil) then
+            content = file:read("*all")
+            io.close(file)
+        end
+        game = json:decode(content)
+
         CheckForUpdates(grp)
         spawn_particles = true
     elseif (phase == "did") then

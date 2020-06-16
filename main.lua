@@ -3,9 +3,9 @@
 local composer = require('composer')
 local sounds = require('libraries.sounds')
 local json = require("libraries.json")
-stats_file = "stats.json"
 
 game = { }
+stats_file = "stats.json"
 app_version = "1.0.0"
 
 -- Global function to animate Power ups in the Menu/Play scenes
@@ -60,23 +60,22 @@ function CheckFile()
         local data = json:decode(content)
         if (data == nil) then
             data = {
-                color = "green",
+                color = "default_color",
                 highscore = 0,
                 levels = {
-                    [1] = true,
-                    [2] = false,
-                    [3] = false,
-                    [4] = false,
-                    [5] = false,
-                    [6] = false,
-                    [7] = false,
-                    [8] = false,
-                    [9] = false,
-                    [10] = false,
+                    [1] = { enabled = true, requirements = { 30 } },
+                    [2] = { enabled = false, requirements = { 60 } },
+                    [3] = { enabled = false, requirements = { 90 } },
+                    [4] = { enabled = false, requirements = { 120 } },
+                    [5] = { enabled = false, requirements = { 150 } },
+                    [6] = { enabled = false, requirements = { 180 } },
+                    [7] = { enabled = false, requirements = { 210 } },
+                    [8] = { enabled = false, requirements = { 240 } },
+                    [9] = { enabled = false, requirements = { 270 } },
+                    [10] = { enabled = false, requirements = { 300 } },
                 }
             }
         end
-        game = data
         file:write(json:encode_pretty(data))
         io.close(file)
     end

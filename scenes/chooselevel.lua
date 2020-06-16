@@ -7,6 +7,7 @@ local widget = require('widget')
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
 local toast = require('modules.toast')
+local group = display.newGroup()
 
 local function switchScene(event)
 
@@ -16,7 +17,7 @@ local function switchScene(event)
 
     sounds.play("onTap")
 
-    if not (game.levels[level]) then
+    if not (game.levels[level].enabled) then
         toast.new("You haven't unlocked level " .. level, 1500, "red", "white")
         return
     end
@@ -104,23 +105,6 @@ local function setUpDisplay(grp)
         levelBtn.levelNum = i
         levelBtn:scale(0.8, 0.9)
         grp:insert(levelBtn)
-
-        --
-        -- padlock image:
-        --
-        local padlock
-        if (game.levels[i]) then
-            padlock = display.newImage("images/backgrounds/padlock_unlocked.png")
-        else
-            padlock = display.newImage("images/backgrounds/padlock_locked.png")
-        end
-
-        padlock.x = x * spacing + 240
-        padlock.y = 100 + y * spacing + 33
-        padlock.alpha = 0.7
-        padlock:scale(0.22, 0.22)
-        grp:insert(padlock)
-
         x = x + 1
         if (x == 3) then
             x = -2
@@ -133,12 +117,32 @@ function scene:create(_)
     setUpDisplay(self.view)
 end
 
-function scene:show(_)
-
+function scene:show()
+    local padlock
+    local x, y = -2, 0
+    local spacing = 100
+    for i = 1, 10 do
+        if (game.levels[i].enabled) then
+            padlock = display.newImage("images/backgrounds/padlock_unlocked.png")
+        else
+            padlock = display.newImage("images/backgrounds/padlock_locked.png")
+        end
+        padlock.x = x * spacing + 240
+        padlock.y = 100 + y * spacing + 33
+        padlock.alpha = 0.7
+        padlock:scale(0.22, 0.22)
+        group:insert(padlock)
+        x = x + 1
+        if (x == 3) then
+            x = -2
+            y = y + 1
+        end
+    end
 end
 
 function scene:hide(_)
-
+    group:removeSelf()
+    group = display.newGroup()
 end
 
 -- -------------------------------------------------------------------------------
