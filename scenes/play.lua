@@ -5,6 +5,7 @@ local rewardBar
 local penaltyBar
 local scoreLabel
 local highScoreLabel
+local levelLabel
 local player
 local spawnConstraint = "no"
 local speedFactor = 1
@@ -102,6 +103,14 @@ local function setUpDisplay(grp)
     highScoreLabel.alpha = 0.20
     highScoreLabel.isVisible = false
     grp:insert(highScoreLabel)
+
+    levelLabel = display.newText("", ContentW / 2, ContentH / 2, native.systemFontBold, 24)
+    levelLabel:setFillColor(colors.RGB("white"))
+    levelLabel.x = (ContentW / 2) + (ContentW / 2) - 70
+    levelLabel.y = ContentH / 2 - 70
+    levelLabel.alpha = 0.20
+    levelLabel.isVisible = false
+    grp:insert(levelLabel)
 end
 
 function scene:create(event)
@@ -165,6 +174,7 @@ function scene:show(event)
 
         -- Show Score labels:
         scoreLabel.isVisible = true
+        levelLabel.isVisible = true
         highScoreLabel.isVisible = true
 
         -- Play Background music: (loop)
@@ -459,8 +469,17 @@ local function OnTick(event)
             player = player2
         end
 
+        --
         -- Display Health Bar:
+        --
         health.bar.new(health.amount)
+
+        --
+        -- Display Level Label:
+        --
+        local current = game.current_level
+        local required = game.levels[current].requirements[1]
+        levelLabel.text = "Level: " .. game.current_level .. "/" .. required
     end
 
     local tDelta = event.time - tPrevious
