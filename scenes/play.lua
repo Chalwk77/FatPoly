@@ -287,16 +287,16 @@ local function gameOver()
 end
 
 function ConstrainToScreen(object)
-    if (object.x < object.width) - object.width / 2 then
+    if object.x < object.width - object.width / 2 then
         object.x = (object.width / 2)
     end
-    if (object.x > ContentW - object.width) + object.width / 2 then
+    if object.x > ContentW - object.width + object.width / 2 then
         object.x = (ContentW - object.width / 2)
     end
-    if (object.y < object.height) - object.height / 2 then
+    if object.y < object.height - object.height / 2 then
         object.y = (object.height / 2)
     end
-    if (object.y > ContentH - object.height) + object.height / 2 then
+    if object.y > ContentH - object.height + object.height / 2 then
         object.y = (ContentH - object.height / 2)
     end
 end
