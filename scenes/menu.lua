@@ -13,6 +13,7 @@ local centerY = display.contentCenterY
 
 local particles = { }
 local spawn_particles
+local logo
 
 local function switchScene(event)
 
@@ -29,13 +30,6 @@ local function switchScene(event)
     composer.gotoScene(sceneID, options)
 end
 
-local collision_dimensions = {
-    { w = 191, h = 180 },
-    { w = 203, h = 185 },
-    { w = 196, h = 175 },
-    { w = 180, h = 182 },
-}
-
 local function setUpDisplay(grp)
     local background = display.newImage("images/backgrounds/background.png")
     background.xScale = (background.contentWidth * 0.5) / background.contentWidth
@@ -46,9 +40,10 @@ local function setUpDisplay(grp)
     background.alpha = 0.30
     grp:insert(background)
 
-    local logo = display.newImage("images/backgrounds/logo.png")
+    logo = display.newImage("images/backgrounds/logo.png")
     logo.x = centerX
     logo.y = centerY - 115
+    logo.alpha = 0
     logo:scale(0.4, 0.4)
     grp:insert(logo)
 
@@ -115,6 +110,7 @@ function scene:create()
 end
 
 function scene:show(event)
+
     local grp = self.view
     local phase = event.phase
     if (phase == "will") then
@@ -139,6 +135,28 @@ function scene:show(event)
         SpawnObject("poison", randomSpeed(), 0)
         SpawnObject("poison", -randomSpeed(), 0)
         SpawnObject("reward", randomSpeed(), 0)
+
+        local size = math.random(1, 2)
+        local rotation = 360
+        if (size == 1) then
+            rotation = -rotation
+        end
+
+        local oXs = logo.xScale
+        local oYs = logo.yScale
+
+        local ReSize = function()
+            logo:scale(oXs, oYs)
+        end
+        transition.to(logo, {
+            delta = true,
+            rotation = rotation,
+            alpha = 1,
+            time = 1000,
+            xScale = oXs,
+            yScale = oYs,
+            onComplete = ReSize
+        })
     end
 end
 
