@@ -9,6 +9,7 @@ local levelLabel
 local player
 
 local starting_health = 30
+local max_player_size = 65
 
 local pW = 20
 local pH = 20
@@ -426,14 +427,9 @@ function Spawn(objectType, xVelocity, yVelocity)
 end
 
 local function gameSpecial(objectType)
-    --local r = math.random(1, 4)
-
-    local r = 4
-    local objectType = "reward"
-
+    local r = math.random(1, 4)
     if (objectType == "reward") then
         if (r == 1) then
-            -- Reduce to half the player's current size:
             player.width = (player.width / 2)
             player.height = (player.height / 2)
             if (player.width < pW) and (player.height < pH) then
@@ -448,24 +444,24 @@ local function gameSpecial(objectType)
             end
             transition.to(rewardLabel, { time = 1000, delay = 2000, onComplete = Hide })
         elseif (r == 2) then
-            rewardBar.isVisible = true
-            rewardLabel.isVisible = true
             rewardLabel.text = "all you can eat"
             spawnConstraint = "allyoucaneat"
+            rewardBar.isVisible = true
+            rewardLabel.isVisible = true
             local closure = function()
                 spawnConstraint = "no"
                 rewardBar.width = 280
-                rewardLabel.isVisible = false
                 rewardBar.isVisible = false
+                rewardLabel.isVisible = false
             end
             transition.to(rewardBar, { time = 5000, width = 0, onComplete = closure })
         elseif (r == 3) then
             if (speedFactor ~= 1) then
                 return
             end
+            rewardLabel.text = "traffic jam"
             rewardBar.isVisible = true
             rewardLabel.isVisible = true
-            rewardLabel.text = "traffic jam"
             transition.to(rewardLabel, { time = 500, delay = 4500 })
             speedFactor = 0.5
             calculateNewVelocity(objects)
@@ -492,49 +488,53 @@ local function gameSpecial(objectType)
         end
     elseif (objectType == "penalty") then
         if (r == 1) then
-            player.width = 50
-            player.height = 50
+            player.width = (player.width + player.width / 3)
+            player.height = (player.height + player.height / 3)
+            if (player.width > max_player_size and player.height > max_player_size) then
+                player.width = max_player_size
+                player.height = max_player_size
+            end
             player.resize = true
             penaltyLabel.text = "weight gain"
-            penaltyLabel.alpha = 0.75
-            transition.to(penaltyLabel, { time = 1000, alpha = 0, delay = 3000 })
+            penaltyLabel.isVisible = true
+            local Hide = function()
+                penaltyLabel.isVisible = false
+            end
+            transition.to(penaltyLabel, { time = 1000, delay = 3000, onComplete = Hide })
         elseif (r == 2) then
             penaltyLabel.text = "food contaminated"
-            penaltyLabel.alpha = 0.25
-            transition.to(penaltyLabel, { time = 500, alpha = 0, delay = 4500 })
+            transition.to(penaltyLabel, { time = 500, delay = 4500 })
             penaltyBar.isVisible = true
+            penaltyLabel.isVisible = true
             spawnConstraint = "foodcontaminated"
             local closure = function()
                 spawnConstraint = "no"
                 penaltyBar.width = 280
-                penaltyBar.isVisible = false;
+                penaltyBar.isVisible = false
+                penaltyLabel.isVisible = false
             end
             transition.to(penaltyBar, { time = 5000, width = 0, onComplete = closure })
-        elseif (r == 3) then
+        else
             if (speedFactor ~= 1) then
                 return
             end
             penaltyLabel.text = "rush hour"
-            penaltyLabel.alpha = 0.75
-            transition.to(penaltyLabel, { time = 500, alpha = 0, delay = 4500 })
+            transition.to(penaltyLabel, { time = 500, delay = 4500 })
             speedFactor = 2
             calculateNewVelocity(objects)
             penaltyBar.isVisible = true
+            penaltyLabel.isVisible = true
             local closure = function()
                 speedFactor = 0.5
                 calculateNewVelocity(objects)
                 speedFactor = 1
                 penaltyBar.width = 280
-                penaltyBar.isVisible = false;
+                penaltyBar.isVisible = false
+                penaltyLabel.isVisible = false
             end
             transition.to(penaltyBar, { time = 5000, width = 0, onComplete = closure })
         end
     end
-    --rewardLabel.x = ContentW / 2
-    --rewardLabel.y = (ContentH / 2) - 75
-    --
-    --penaltyLabel.x = ContentW / 2
-    --penaltyLabel.y = (ContentH / 2) - 75
 end
 
 local function OnTick(event)
@@ -667,7 +667,7 @@ local function onCollision(event)
             sounds.play("onPickup")
             score = score + 1
             scoreLabel.text = tostring(score)
-            if (player.width < 65) then
+            if (player.width < max_player_size) then
                 player.resize = true
             end
             o.isVisible = false
