@@ -188,7 +188,7 @@ function SpawnObject(objectType, xVelocity, yVelocity)
             Object = display.newRect(startX, startY, sizeXY, sizeXY)
             Object.sizeXY = sizeXY
         elseif (objectType == "reward" or objectType == "penalty") then
-            Object = display.newCircle(startX, startY, 15) -- Start obj.x, Start obj.y (radius)
+            Object = display.newCircle(startX, startY, 15)
             Object.sizeXY = 0
             AnimatePowerUp(Object)
         end

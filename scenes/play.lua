@@ -18,7 +18,18 @@ local speedFactor = 1
 
 local score = 0
 local tPrevious = system.getTimer()
-local speed = { }
+local speed = {
+    [1] = { 1, 2, 0.005 },
+    [2] = { 1, 2, 0.010 },
+    [3] = { 1, 2, 0.015 },
+    [4] = { 1, 2, 0.025 },
+    [5] = { 1, 2, 0.035 },
+    [6] = { 1, 2, 0.045 },
+    [7] = { 1, 2, 0.055 },
+    [8] = { 1, 2, 0.070 },
+    [9] = { 1, 2, 0.080 },
+    [10] = { 1, 2, 0.100 }
+}
 local borders = { }
 local objects = { }
 local health = { }
@@ -265,7 +276,8 @@ function createPlayer(x, y, width, height, rotation, visible)
 end
 
 local function randomSpeed()
-    return math.random(speed.min, speed.max) / 10 * speedFactor + speed.offset
+    local S = math.random(speed.min, speed.max)
+    return (S / 10) * speedFactor + (speed.offset)
 end
 
 local function calculateNewVelocity(t)
@@ -288,6 +300,9 @@ local function gameOver()
 
     -- HIDE: health bar & hearts --
     health.bar.isVisible = false
+    for i = 1, 5 do
+        health.hearts[i].isVisible = false
+    end
 
     -- Remove objects:
     for _, v in pairs(objects) do
@@ -721,9 +736,9 @@ local function onCollision(event)
 end
 
 function SetLevelSpeed()
-    local T = game.levels[game.current_level][3]
-    speed.min, speed.max = T[1], T[2]
-    speed.offset = T[3]
+    local lvl = game.current_level
+    speed.min, speed.max = speed[lvl][1], speed[lvl][2]
+    speed.offset = speed[lvl][3]
 end
 
 function HeartsAnimation()
