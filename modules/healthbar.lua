@@ -15,23 +15,10 @@ local actualContent = {
     moreHeight = display.actualContentHeight - display.contentHeight,
 }
 
-function newhealth(CurrentHealth)
-
-    local txt = ""
-    if (CurrentHealth == 100) then
-        txt = "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"
-    elseif (CurrentHealth == 75) then
-        txt = "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"
-    elseif (CurrentHealth == 50) then
-        txt = "IIIIIIIIIIIIIIIIIIII"
-    elseif (CurrentHealth == 25) then
-        txt = "IIIII"
-    elseif (CurrentHealth == 0) then
-        txt = "I"
-    end
-
+function newhealth(Text, Tab)
+    
     local health = display.newGroup();
-    health.text = display.newText(health, txt, 0, 0, native.systemFont, 7);
+    health.text = display.newText(health, Text, 0, 0, native.systemFont, 7);
     health.text:setTextColor(1, 1, 1)
     health.background = display.newRect(health, 0, 0, health.text.width + 20, health.text.height);
     health.background.strokeWidth = 1
@@ -46,27 +33,13 @@ function newhealth(CurrentHealth)
     health.x = display.contentWidth * .5 + 170
     health.y = actualContent.height * .8 - 195
 
-    if (CurrentHealth == 100) then
-        health.background:setFillColor(colors.RGB("health1"))
-        health.text:setFillColor(colors.RGB("black"))
-    elseif (CurrentHealth == 75) then
-        health.background:setFillColor(colors.RGB("health2"))
-        health.text:setFillColor(colors.RGB("black"))
-    elseif (CurrentHealth == 50) then
-        health.background:setFillColor(colors.RGB("health3"))
-        health.text:setFillColor(colors.RGB("white"))
-    elseif (CurrentHealth == 25) then
-        health.background:setFillColor(colors.RGB("health4"))
-        health.text:setFillColor(colors.RGB("white"))
-    elseif (CurrentHealth == 0) then
-        health.background:setFillColor(colors.RGB("health5"))
-        health.text:setFillColor(colors.RGB("white"))
-    end
+    health.background:setFillColor(colors.RGB(Tab[3]))
+    health.text:setFillColor(colors.RGB(Tab[4]))
     return health;
 end
 
-function new(CurrentHealth)
-    newhealth(CurrentHealth)
+function new(Text, Tab)
+    newhealth(Text, Tab)
 end
 
 destroy = function(health)

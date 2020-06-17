@@ -8,6 +8,8 @@ local highScoreLabel
 local levelLabel
 local player
 
+local starting_health = 30
+
 local pW = 20
 local pH = 20
 
@@ -16,6 +18,7 @@ local speedFactor = 1
 
 local score = 0
 local tPrevious = system.getTimer()
+local speed = { }
 local borders = { }
 local objects = { }
 local health = { }
@@ -28,6 +31,24 @@ local sounds = require('libraries.sounds')
 local colors = require('classes.colors-rgb')
 local composer = require('composer')
 local scene = composer.newScene()
+
+local collision_dimensions = {
+    { w = 191, h = 180 },
+    { w = 203, h = 185 },
+    { w = 196, h = 175 },
+}
+
+local health_params
+local function initHealthParams()
+    health_params = {
+        [1] = { 25, 30, "health1", "black" },
+        [2] = { 19, 24, "health2", "black" },
+        [3] = { 13, 18, "health3", "black" },
+        [4] = { 7, 12, "health4", "white" },
+        [5] = { 1, 6, "health5", "white" },
+        txt = "IIIIIIIIIIIIIIIIIIIIIIIIIIIIII"
+    }
+end
 
 --
 -- COMMON SCREEN COORDINATES:
@@ -63,52 +84,61 @@ local function setUpDisplay(grp)
     background:addEventListener("touch", onTouch)
     grp:insert(background)
 
-    rewardLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
-    rewardLabel.x = ContentW / 2
-    rewardLabel.y = 95
-    rewardLabel:setTextColor(0, 0, 0)
-    rewardLabel.alpha = 0
+    local CX = ContentW / 2
+    local CY = (ContentH / 2)
+
+    rewardLabel = display.newText("reward", CX, CY, native.systemFontBold, 18)
+    rewardLabel:setTextColor(colors.RGB("green"))
+    rewardLabel.x = CX
+    rewardLabel.y = CY + CY - 55
+    rewardLabel.alpha = 0.50
     rewardLabel.isVisible = false
     grp:insert(rewardLabel)
 
-    rewardBar = display.newRect(100, 80, 280, 30)
-    rewardBar:setFillColor(0, 0, 0, 50)
+    rewardBar = display.newRect(100, CX, CY, 30)
+    rewardBar:setFillColor(colors.RGB("white"))
+    rewardBar.x = CX
+    rewardBar.y = CY + CY - 28
+    rewardBar.alpha = 0.20
     rewardBar.isVisible = false
     grp:insert(rewardBar)
 
-    penaltyLabel = display.newText("penalty", 0, 0, native.systemFontBold, 20)
-    penaltyLabel.x = ContentW / 2
-    penaltyLabel.y = ContentH - 15 - 80
-    penaltyLabel:setTextColor(0, 0, 255)
-    penaltyLabel.alpha = 0
+    penaltyLabel = display.newText("penalty", CX, CY, native.systemFontBold, 18)
+    penaltyLabel:setTextColor(colors.RGB("red"))
+    penaltyLabel.x = CX
+    penaltyLabel.y = CY + CY - 55
+    penaltyLabel.alpha = 0.50
     penaltyLabel.isVisible = false
     grp:insert(penaltyLabel)
 
-    penaltyBar = display.newRect(100, ContentH - 30 - 80, 280, 30)
-    penaltyBar:setFillColor(0, 0, 255, 50)
+    penaltyBar = display.newRect(100, CX, CY, 30)
+    penaltyBar:setFillColor(colors.RGB("white"))
+    penaltyBar.x = CX
+    penaltyBar.y = CY + CY - 28
+    penaltyBar.alpha = 0.20
     penaltyBar.isVisible = false
     grp:insert(penaltyBar)
 
-    scoreLabel = display.newText(tostring(score), ContentW / 2, ContentH / 2, native.systemFontBold, 120)
+    scoreLabel = display.newText(tostring(score), CX, CY, native.systemFontBold, 120)
     scoreLabel:setFillColor(colors.RGB("white"))
-    scoreLabel.x = display.viewableContentWidth / 2
-    scoreLabel.y = display.viewableContentHeight / 2
+    scoreLabel.x = CX
+    scoreLabel.y = CY
     scoreLabel.alpha = 0.20
     scoreLabel.isVisible = false
     grp:insert(scoreLabel)
 
-    highScoreLabel = display.newText("Highest Score: " .. tostring(game.highscore) or 0, ContentW / 2, ContentH / 2, native.systemFontBold, 15)
+    highScoreLabel = display.newText("Highest Score: " .. tostring(game.highscore), CX, CY, native.systemFontBold, 15)
     highScoreLabel:setFillColor(colors.RGB("white"))
-    highScoreLabel.x = ContentW / 2
-    highScoreLabel.y = (ContentH / 2) - (ContentH / 2) + 20
+    highScoreLabel.x = CX
+    highScoreLabel.y = CY - CY + 20
     highScoreLabel.alpha = 0.20
     highScoreLabel.isVisible = false
     grp:insert(highScoreLabel)
 
     levelLabel = display.newText("", ContentW / 2, ContentH / 2, native.systemFontBold, 24)
     levelLabel:setFillColor(colors.RGB("white"))
-    levelLabel.x = (ContentW / 2) + (ContentW / 2) - 70
-    levelLabel.y = ContentH / 2 - 70
+    levelLabel.x = CX + CX - 70
+    levelLabel.y = CY - 70
     levelLabel.alpha = 0.20
     levelLabel.isVisible = false
     grp:insert(levelLabel)
@@ -149,6 +179,9 @@ function scene:show(event)
     local phase = event.phase
     if (phase == "will") then
 
+        SetLevelSpeed()
+        initHealthParams()
+
         score = 0
         scoreLabel.text = tostring(score)
         gameIsOver = false
@@ -168,11 +201,8 @@ function scene:show(event)
             rate = rate - 100
         end
 
-        health.hearts[1].isVisible = true
-        health.hearts.current = 1
-
         -- Initial player health:
-        health.amount = 100
+        health.amount = starting_health
 
     elseif (phase == "did") then
 
@@ -214,9 +244,6 @@ local function switchScene(Scene)
 end
 
 function createPlayer(x, y, width, height, rotation, visible)
-
-    print(width, height)
-
     local playerCollisionFilter = { categoryBits = 2, maskBits = 5 }
     local playerBodyElement = { filter = playerCollisionFilter }
     local player = display.newRect(x, y, width, height)
@@ -238,7 +265,7 @@ function createPlayer(x, y, width, height, rotation, visible)
 end
 
 local function randomSpeed()
-    return math.random(1, 2) / 10 * speedFactor
+    return math.random(speed.min, speed.max) / 10 * speedFactor + speed.offset
 end
 
 local function calculateNewVelocity(t)
@@ -251,18 +278,16 @@ end
 local function gameOver()
     gameIsOver = true
 
+    -- Hide Reward|Penalty (bars & text)
     rewardBar.isVisible = false
-    penaltyLabel.alpha = 0
+    rewardLabel.isVisible = false
     penaltyBar.isVisible = false
+    penaltyLabel.isVisible = false
 
     player.isVisible = false
 
     -- HIDE: health bar & hearts --
     health.bar.isVisible = false
-    for i = 1, 5 do
-        health.hearts[i].isVisible = false
-    end
-    --
 
     -- Remove objects:
     for _, v in pairs(objects) do
@@ -386,25 +411,36 @@ function Spawn(objectType, xVelocity, yVelocity)
 end
 
 local function gameSpecial(objectType)
-    local r = math.random(1, 3)
+    --local r = math.random(1, 4)
+
+    local r = 4
+    local objectType = "reward"
 
     if (objectType == "reward") then
         if (r == 1) then
-            player.width = 15
-            player.height = 15
+            -- Reduce to half the player's current size:
+            player.width = (player.width / 2)
+            player.height = (player.height / 2)
+            if (player.width < pW) and (player.height < pH) then
+                player.width = pW
+                player.height = pH
+            end
             player.resize = true
             rewardLabel.text = "weight loss"
-            rewardLabel.alpha = 0.25
-            transition.to(rewardLabel, { time = 1000, alpha = 0, delay = 3000 })
+            rewardLabel.isVisible = true
+            local Hide = function()
+                rewardLabel.isVisible = false
+            end
+            transition.to(rewardLabel, { time = 1000, delay = 2000, onComplete = Hide })
         elseif (r == 2) then
-            rewardLabel.text = "all you can eat"
-            rewardLabel.alpha = 0.25
-            transition.to(rewardLabel, { time = 500, alpha = 0, delay = 4500 })
             rewardBar.isVisible = true
+            rewardLabel.isVisible = true
+            rewardLabel.text = "all you can eat"
             spawnConstraint = "allyoucaneat"
             local closure = function()
                 spawnConstraint = "no"
                 rewardBar.width = 280
+                rewardLabel.isVisible = false
                 rewardBar.isVisible = false
             end
             transition.to(rewardBar, { time = 5000, width = 0, onComplete = closure })
@@ -412,20 +448,32 @@ local function gameSpecial(objectType)
             if (speedFactor ~= 1) then
                 return
             end
+            rewardBar.isVisible = true
+            rewardLabel.isVisible = true
             rewardLabel.text = "traffic jam"
-            rewardLabel.alpha = 0.25
-            transition.to(rewardLabel, { time = 500, alpha = 0, delay = 4500 })
+            transition.to(rewardLabel, { time = 500, delay = 4500 })
             speedFactor = 0.5
             calculateNewVelocity(objects)
-            rewardBar.isVisible = true
             local closure = function()
                 speedFactor = 2
                 calculateNewVelocity(objects)
                 speedFactor = 1
                 rewardBar.width = 280
                 rewardBar.isVisible = false
+                rewardLabel.isVisible = false
             end
             transition.to(rewardBar, { time = 5000, width = 0, onComplete = closure })
+        elseif (r == 4) then
+            rewardLabel.txt = "+25 health"
+            rewardLabel.isVisible = true
+            health.amount = health.amount + 5
+            if (health.amount > starting_health) then
+                health.amount = starting_health
+            end
+            local Hide = function()
+                rewardLabel.isVisible = false
+            end
+            transition.to(rewardLabel, { time = 1000, delay = 3000, onComplete = Hide })
         end
     elseif (objectType == "penalty") then
         if (r == 1) then
@@ -433,7 +481,7 @@ local function gameSpecial(objectType)
             player.height = 50
             player.resize = true
             penaltyLabel.text = "weight gain"
-            penaltyLabel.alpha = 0.25
+            penaltyLabel.alpha = 0.75
             transition.to(penaltyLabel, { time = 1000, alpha = 0, delay = 3000 })
         elseif (r == 2) then
             penaltyLabel.text = "food contaminated"
@@ -452,7 +500,7 @@ local function gameSpecial(objectType)
                 return
             end
             penaltyLabel.text = "rush hour"
-            penaltyLabel.alpha = 0.25
+            penaltyLabel.alpha = 0.75
             transition.to(penaltyLabel, { time = 500, alpha = 0, delay = 4500 })
             speedFactor = 2
             calculateNewVelocity(objects)
@@ -467,8 +515,11 @@ local function gameSpecial(objectType)
             transition.to(penaltyBar, { time = 5000, width = 0, onComplete = closure })
         end
     end
-    rewardLabel.x = ContentW / 2
-    penaltyLabel.x = ContentW / 2
+    --rewardLabel.x = ContentW / 2
+    --rewardLabel.y = (ContentH / 2) - 75
+    --
+    --penaltyLabel.x = ContentW / 2
+    --penaltyLabel.y = (ContentH / 2) - 75
 end
 
 local function OnTick(event)
@@ -480,11 +531,10 @@ local function OnTick(event)
     if (player) then
         if (player.resize) then
 
-            local weight_percentage = 1.500
+            local weight_percentage = 1.900
             local X, Y = player.x, player.y
             local W = (player.width - weight_percentage)
             local H = (player.height - weight_percentage)
-
             local player2 = createPlayer(X, Y, W, H, player.rotation, player.isVisible)
             if (player.isFocus) then
                 player2.isFocus = player.isFocus
@@ -499,7 +549,19 @@ local function OnTick(event)
         --
         -- Display Health Bar:
         --
-        health.bar.new(health.amount)
+        for i = 1, #health_params do
+            local min = health_params[i][1]
+            local max = health_params[i][2]
+            if (health.amount >= min) and (health.amount <= max) then
+                health.hearts[i].isVisible = true
+                health.hearts.current = i
+            else
+                health.hearts[i].isVisible = false
+            end
+        end
+        local txt = health_params.txt
+        local Tab = health_params[health.hearts.current]
+        health.bar.new(txt, Tab)
 
         --
         -- Display Level Label:
@@ -591,8 +653,6 @@ local function onCollision(event)
             score = score + 1
             scoreLabel.text = tostring(score)
             if (player.width < 65) then
-                --player.width = player.width + 1
-                --player.height = player.height + 1
                 player.resize = true
             end
             o.isVisible = false
@@ -608,25 +668,48 @@ local function onCollision(event)
             local required = game.levels[current_level][2]
 
             if (score == required) then
+
+                -- Update level:
                 local new_level = current_level + 1
                 if (new_level == #game.levels) then
                     new_level = #game.levels
                 end
                 game.current_level = new_level
                 game.levels[new_level][1] = true
+                --
+
+                -- Play level-up sound effect:
                 sounds.play("onLevelup")
+                --
+
+                -- Update food speed:
+                SetLevelSpeed()
+                --
+
+                -- Play level-up animation:
+                levelupAnimation()
+                --
             end
 
         elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
             sounds.play("onDamage")
-            health.amount = health.amount - 25
-            health.hearts[health.hearts.current].isVisible = false
-            health.hearts.current = health.hearts.current + 1
-            if (health.hearts.current > 5) then
-                health.hearts.current = 5
+            health.amount = health.amount - 1
+
+            local txt = health_params.txt
+            local chars = {}
+            for i = 1, string.len(txt) do
+                chars[i] = string.sub(txt, i, i)
             end
-            health.hearts[health.hearts.current].isVisible = true
-            if (health.amount <= -25) then
+
+            local replacement = ""
+            for i = 1, #chars do
+                if (i < #chars) then
+                    replacement = replacement .. chars[i]
+                end
+            end
+            health_params.txt = replacement
+
+            if (health.amount < 1) then
                 gameOver()
             end
         elseif (ot == "reward") or (ot == "penalty") then
@@ -635,6 +718,12 @@ local function onCollision(event)
             gameSpecial(ot)
         end
     end
+end
+
+function SetLevelSpeed()
+    local T = game.levels[game.current_level][3]
+    speed.min, speed.max = T[1], T[2]
+    speed.offset = T[3]
 end
 
 function HeartsAnimation()
@@ -654,6 +743,23 @@ function HeartsAnimation()
         xScale = 2,
         yScale = 2,
         onComplete = scaleUp
+    })
+end
+
+function levelupAnimation()
+    local i = math.random(1, 3)
+    local dir = 'images/particle effects/combo particles/'
+    local p = display.newImageRect(dir .. i .. '.png', collision_dimensions[i].w, collision_dimensions[i].h)
+    p.x, p.y = player.x, player.y
+    p:scale(0.5, 0.5)
+    transition.to(p, {
+        time = 50,
+        xScale = 1,
+        yScale = 1,
+        alpha = 1,
+        onComplete = function(object)
+            object:removeSelf()
+        end
     })
 end
 

@@ -29,8 +29,14 @@ local function switchScene(event)
     composer.gotoScene(sceneID, options)
 end
 
-local function setUpDisplay(grp)
+local collision_dimensions = {
+    { w = 191, h = 180 },
+    { w = 203, h = 185 },
+    { w = 196, h = 175 },
+    { w = 180, h = 182 },
+}
 
+local function setUpDisplay(grp)
     local background = display.newImage("images/backgrounds/background.png")
     background.xScale = (background.contentWidth * 0.5) / background.contentWidth
     background.yScale = background.xScale
@@ -108,7 +114,6 @@ function scene:create()
     --sounds.playStream('menu_music')
 end
 
-local borders = { }
 function scene:show(event)
     local grp = self.view
     local phase = event.phase
