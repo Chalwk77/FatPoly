@@ -16,21 +16,11 @@ local pH = 20
 
 local spawnConstraint = "no"
 local speedFactor = 1
+local speed = { }
 
 local score = 0
 local tPrevious = system.getTimer()
-local speed = {
-    [1] = { 1, 2, 0.005 },
-    [2] = { 1, 2, 0.010 },
-    [3] = { 1, 2, 0.015 },
-    [4] = { 1, 2, 0.025 },
-    [5] = { 1, 2, 0.035 },
-    [6] = { 1, 2, 0.045 },
-    [7] = { 1, 2, 0.055 },
-    [8] = { 1, 2, 0.070 },
-    [9] = { 1, 2, 0.080 },
-    [10] = { 1, 2, 0.100 }
-}
+
 local borders = { }
 local objects = { }
 local health = { }
@@ -340,6 +330,21 @@ function ConstrainToScreen(object)
     end
 end
 
+local mouse = { }
+local function MouseOver(event)
+    if (gameIsOver) then
+        return
+    end
+    mouse.x, mouse.y = event.x, event.y
+end
+
+function intersecting(mX, mY, pX, pY)
+    local w, h = player.width, player.height
+    if ((mX > pX) and (mX < pX + w) and (mY > pY) and (mY < pY + h)) then
+        return true
+    end
+end
+
 function onTouch(event)
     if (gameIsOver) then
         return
@@ -561,6 +566,22 @@ local function OnTick(event)
             player = player2
         end
 
+
+        --[[
+        -- Call mouse intersect collision function:
+        --
+        if (mouse.x and mouse.y) then
+            local hovering = intersecting(mouse.x, mouse.y, player.x, player.y)
+            if (hovering) then
+                player:setStrokeColor(0/255, 255/255, 0/255)
+            else
+                player:setStrokeColor(colors.RGB("white"))
+            end
+        end
+        --
+        --]]
+
+
         --
         -- Display Health Bar:
         --
@@ -737,8 +758,9 @@ end
 
 function SetLevelSpeed()
     local lvl = game.current_level
-    speed.min, speed.max = speed[lvl][1], speed[lvl][2]
-    speed.offset = speed[lvl][3]
+    local T = game.levels[lvl][3]
+    speed.min, speed.max = T[1], T[2]
+    speed.offset = T[3]
 end
 
 function HeartsAnimation()
@@ -780,6 +802,11 @@ end
 
 Runtime:addEventListener("collision", onCollision)
 Runtime:addEventListener("enterFrame", OnTick)
+
+--
+-- todo: Finish trig calculations for screen coordinates:
+--Runtime:addEventListener("mouse", MouseOver)
+--------------------------------------------------------
 
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
