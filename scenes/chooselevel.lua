@@ -86,6 +86,7 @@ local function setUpDisplay(grp)
 
     local x, y = -2, 0
     local spacing = 100
+
     for i = 1, 10 do
         local levelBtn = widget.newButton({
             label = "Level " .. i,
@@ -100,7 +101,7 @@ local function setUpDisplay(grp)
             height = 64,
             x = x * spacing + 240,
             y = 100 + y * spacing + 25,
-            onRelease = switchScene
+            onRelease = switchScene,
         })
         levelBtn.levelNum = i
         levelBtn:scale(0.8, 0.9)
@@ -129,7 +130,7 @@ function scene:show()
         end
         padlock.x = x * spacing + 240
         padlock.y = 100 + y * spacing + 33
-        padlock.alpha = 0.7
+        padlock.alpha = 1
         padlock:scale(0.22, 0.22)
         group:insert(padlock)
         x = x + 1

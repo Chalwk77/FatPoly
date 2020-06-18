@@ -27,7 +27,8 @@ local health = { }
 health.hearts = { }
 health.bar = require('modules.healthbar')
 
-local sidebar = require("modules.sidebar")
+local widget = require('widget')
+local pause = require("modules.pause")
 local json = require("libraries.json")
 local physics = require("physics")
 local sounds = require('libraries.sounds')
@@ -51,6 +52,18 @@ local function initHealthParams()
         [5] = { 1, 6, "health5", "white" },
         txt = "IIIIIIIIIIIIIIIIIIIIIIIIIIIIII"
     }
+end
+
+local lightning_effect = { }
+local function LoadLightningEffects()
+    local dir = 'images/particle effects/combo particles/'
+    for i = 1, 3 do
+        local p = display.newImageRect(dir .. i .. '.png', collision_dimensions[i].w, collision_dimensions[i].h)
+        p.alpha = 0
+        p.isVisible = false
+        p:scale(0.5, 0.5)
+        lightning_effect[i] = p
+    end
 end
 
 --
@@ -77,6 +90,8 @@ end
 local function setUpDisplay(grp)
 
     display.setStatusBar(display.HiddenStatusBar)
+    pause:new()
+    LoadLightningEffects()
 
     local background = display.newImage(grp, "images/backgrounds/background.png")
     background.xScale = (background.contentWidth / background.contentWidth)
@@ -723,8 +738,8 @@ local function onCollision(event)
                 SetLevelSpeed()
                 --
 
-                -- Play level-up animation:
-                levelupAnimation()
+                -- Show lightning effect:
+                ShowLightning(player.x, player.y)
                 --
             end
 
@@ -784,19 +799,16 @@ function HeartsAnimation()
     })
 end
 
-function levelupAnimation()
+function ShowLightning(x, y)
     local i = math.random(1, 3)
-    local dir = 'images/particle effects/combo particles/'
-    local p = display.newImageRect(dir .. i .. '.png', collision_dimensions[i].w, collision_dimensions[i].h)
-    p.x, p.y = player.x, player.y
-    p:scale(0.5, 0.5)
-    transition.to(p, {
-        time = 50,
-        xScale = 1,
-        yScale = 1,
-        alpha = 1,
+    lightning_effect[i].isVisible = true
+    lightning_effect[i].x = x
+    lightning_effect[i].y = y
+    lightning_effect[i].alpha = 1
+    transition.to(lightning_effect[i], {
+        time = 50, xScale = 1, yScale = 1, alpha = 0,
         onComplete = function(object)
-            object:removeSelf()
+            object.isVisible = false
         end
     })
 end

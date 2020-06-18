@@ -6,7 +6,6 @@ local widget = require('widget')
 local sounds = require('libraries.sounds')
 local physics = require("physics")
 local colors = require("classes.colors-rgb")
-local sidebar = require("modules.sidebar")
 
 local menu_tPrevious = system.getTimer()
 local centerX = display.contentCenterX
@@ -14,7 +13,6 @@ local centerY = display.contentCenterY
 
 local particles = { }
 local spawn_particles
-local logo
 
 local function switchScene(event)
 
@@ -33,7 +31,8 @@ end
 
 local function setUpDisplay(grp)
 
-    sidebar:new()
+    local real_H = display.actualContentHeight
+    local real_W = display.actualContentWidth
 
     local background = display.newImage("images/backgrounds/background.png")
     background.xScale = (background.contentWidth * 0.5) / background.contentWidth
@@ -44,10 +43,18 @@ local function setUpDisplay(grp)
     background.alpha = 0.30
     grp:insert(background)
 
-    logo = display.newImage("images/backgrounds/logo.png")
+    local icon = display.newImage("Icon.png")
+    icon.x = real_W * 0.5 - 172
+    icon.y = real_H * 0.5 + 93
+    icon.rotation = 45
+    icon.alpha = 0.50
+    icon:scale(0.2, 0.2)
+    grp:insert(icon)
+
+    local logo = display.newImage("images/backgrounds/logo.png")
     logo.x = centerX
-    logo.y = centerY - 115
-    logo.alpha = 0
+    logo.y = centerY - 100
+    logo.alpha = 1
     logo:scale(0.4, 0.4)
     grp:insert(logo)
 
@@ -141,27 +148,27 @@ function scene:show(event)
         SpawnObject("poison", -randomSpeed(), 0)
         SpawnObject("reward", randomSpeed(), 0)
 
-        local size = math.random(1, 2)
-        local rotation = 360
-        if (size == 1) then
-            rotation = -rotation
-        end
-
-        local oXs = logo.xScale
-        local oYs = logo.yScale
-
-        local ReSize = function()
-            logo:scale(oXs, oYs)
-        end
-        transition.to(logo, {
-            delta = true,
-            rotation = rotation,
-            alpha = 1,
-            time = 1000,
-            xScale = oXs,
-            yScale = oYs,
-            onComplete = ReSize
-        })
+        --local size = math.random(1, 2)
+        --local rotation = 360
+        --if (size == 1) then
+        --    rotation = -rotation
+        --end
+        --
+        --local oXs = logo.xScale
+        --local oYs = logo.yScale
+        --
+        --local ReSize = function()
+        --    logo:scale(oXs, oYs)
+        --end
+        --transition.to(logo, {
+        --    delta = true,
+        --    rotation = rotation,
+        --    alpha = 1,
+        --    time = 1000,
+        --    xScale = oXs,
+        --    yScale = oYs,
+        --    onComplete = ReSize
+        --})
     end
 end
 
