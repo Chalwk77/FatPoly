@@ -27,6 +27,7 @@ local health = { }
 health.hearts = { }
 health.bar = require('modules.healthbar')
 
+local sidebar = require("modules.sidebar")
 local json = require("libraries.json")
 local physics = require("physics")
 local sounds = require('libraries.sounds')
@@ -228,7 +229,7 @@ function scene:show(event)
         highScoreLabel.isVisible = true
 
         -- Play Background music: (loop)
-        sounds.playStream('game_music')
+        --sounds.playStream('game_music')
     end
 end
 

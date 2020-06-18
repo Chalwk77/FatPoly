@@ -6,6 +6,7 @@ local widget = require('widget')
 local sounds = require('libraries.sounds')
 local physics = require("physics")
 local colors = require("classes.colors-rgb")
+local sidebar = require("modules.sidebar")
 
 local menu_tPrevious = system.getTimer()
 local centerX = display.contentCenterX
@@ -31,6 +32,9 @@ local function switchScene(event)
 end
 
 local function setUpDisplay(grp)
+
+    sidebar:new()
+
     local background = display.newImage("images/backgrounds/background.png")
     background.xScale = (background.contentWidth * 0.5) / background.contentWidth
     background.yScale = background.xScale
