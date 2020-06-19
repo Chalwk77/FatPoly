@@ -1,5 +1,5 @@
 module(..., package.seeall)
-local colors = require('classes.colors-rgb')
+local colors = require('libraries.colors-rgb')
 
 local trueDestroy
 local destroy

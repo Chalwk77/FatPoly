@@ -2,7 +2,7 @@ local composer = require("composer")
 local scene = composer.newScene()
 local widget = require('widget')
 local sounds = require('libraries.sounds')
-local colors = require('classes.colors-rgb')
+local colors = require('libraries.colors-rgb')
 
 local function setUpDisplay(grp)
 
@@ -12,14 +12,14 @@ local function setUpDisplay(grp)
     --
     -- Background:
     --
-    local background = display.newImageRect("images/backgrounds/background.png", display.contentWidth + 550, display.contentHeight + 1000)
-    background.alpha = 0.50
+    local background = display.newImageRect("images/menu scene/menu-background.png", display.contentWidth + 550, display.contentHeight + 1000)
+    background.alpha = 0.20
     grp:insert(background)
 
     --
     -- About Info:
     --
-    local info = display.newImage("images/backgrounds/about_information.png")
+    local info = display.newImage("images/about scene/information.png")
     info.xScale = (0.5 * background.contentWidth) / background.contentWidth
     info.yScale = info.xScale
     info.x = display.contentCenterX
@@ -31,7 +31,7 @@ local function setUpDisplay(grp)
     --
     -- Copyright Notice
     --
-    local txt = "Copyright © 2020, Particle Plex, Jericho Crosby <jericho.crosby227@gmail.com>"
+    local txt = "Copyright © 2020, Fat Poly, Jericho Crosby <jericho.crosby227@gmail.com>"
     local copyright = display.newText(txt, 0, 0, native.systemFontBold, 8)
     copyright.x = width
     copyright.y = (height + height) - 5
@@ -43,8 +43,8 @@ local function setUpDisplay(grp)
     -- Back Button:
     --
     local backButton = widget.newButton({
-        defaultFile = "images/buttons/backbutton.png",
-        overFile = "images/buttons/backbutton-over.png",
+        defaultFile = "images/buttons/back.png",
+        overFile = "images/buttons/back-over.png",
         onRelease = function()
             sounds.play("onTap")
             composer.gotoScene("scenes.menu", { effect = "crossFade", time = 300 })

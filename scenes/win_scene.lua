@@ -1,8 +1,9 @@
 local composer = require('composer')
+local scene = composer.newScene()
+
 local widget = require('widget')
 local sounds = require('libraries.sounds')
 local relayout = require('libraries.relayout')
-local scene = composer.newScene()
 
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY

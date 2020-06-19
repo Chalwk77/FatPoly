@@ -1,8 +1,9 @@
 local composer = require('composer')
-local sounds = require('libraries.sounds')
-local toast = require('modules.toast')
 local scene = composer.newScene()
+
 local widget = require('widget')
+local toast = require('modules.toast')
+local sounds = require('libraries.sounds')
 
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
@@ -18,7 +19,7 @@ local function setUpDisplay(grp)
 
     local width, height = (display.contentWidth / 2), (display.contentHeight / 2)
 
-    local bg = display.newImage("images/backgrounds/colorselectbg.png")
+    local bg = display.newImage("images/color selection scene/background.png")
     bg.xScale = (bg.contentWidth / bg.contentWidth)
     bg.yScale = bg.xScale
     bg.x = centerX
@@ -27,7 +28,7 @@ local function setUpDisplay(grp)
     bg:scale(1, 1)
     grp:insert(bg)
 
-    local title_logo = display.newImage("images/backgrounds/colorselect.png")
+    local title_logo = display.newImage("images/color selection scene/title-logo.png")
     title_logo.xScale = (bg.contentWidth / bg.contentWidth)
     title_logo.yScale = bg.xScale
     title_logo.x = centerX
@@ -41,8 +42,8 @@ local function setUpDisplay(grp)
     --
     local backButton = widget.newButton({
         id = "scenes.options",
-        defaultFile = "images/buttons/backbutton.png",
-        overFile = "images/buttons/backbutton-over.png",
+        defaultFile = "images/buttons/back.png",
+        overFile = "images/buttons/back-over.png",
         onRelease = switchScene
     })
     backButton.x = width - width + 20
@@ -56,8 +57,8 @@ local function setUpDisplay(grp)
     for i = 1, 9 do
 
         local COLOR = widget.newButton({
-            defaultFile = 'images/color data/slide_menu' .. i .. '.png',
-            overFile = 'images/color data/slide_menu' .. i .. '_press.png',
+            defaultFile = 'images/misc/player colors/color' .. i .. '.png',
+            overFile = 'images/misc/player colors/color' .. i .. '-over.png',
             width = 64, height = 64,
             x = x * spacing + 240,
             y = 100 + y * spacing + 25,

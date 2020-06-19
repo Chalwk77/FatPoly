@@ -25,12 +25,12 @@ function _M.playStream(sound, force)
     if not _M.isMusicOn then
         return
     end
-    if not sounds[sound] then
+    if (not sounds[sound]) then
         print('sounds: no such sound: ' .. tostring(sound))
         return
     end
     sound = sounds[sound]
-    if currentStreamSound == sound and not force then
+    if (currentStreamSound == sound) and (not force) then
         return
     end
     audio.fadeOut({ channel = audioChannel, time = 1000 })
@@ -43,7 +43,7 @@ audio.reserveChannels(2)
 
 local loadedSounds = {}
 local function loadSound(sound)
-    if not loadedSounds[sound] then
+    if not (loadedSounds[sound]) then
         loadedSounds[sound] = audio.loadSound(sounds[sound])
     end
     return loadedSounds[sound]
@@ -53,7 +53,7 @@ function _M.play(sound, params)
     if not _M.isSoundOn then
         return
     end
-    if not sounds[sound] then
+    if (not sounds[sound]) then
         print('sounds: no such sound: ' .. tostring(sound))
         return
     end

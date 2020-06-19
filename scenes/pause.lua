@@ -1,8 +1,8 @@
 local composer = require('composer')
+local scene = composer.newScene()
+
 local sounds = require('libraries.sounds')
 local widget = require('widget')
-widget.setTheme('widget_theme_ios')
-local scene = composer.newScene()
 
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY

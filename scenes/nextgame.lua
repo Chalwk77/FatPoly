@@ -1,6 +1,7 @@
 local composer = require('composer')
-local relayout = require('libraries.relayout')
 local scene = composer.newScene()
+
+local relayout = require('libraries.relayout')
 local reloadDelay = 500
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
@@ -30,7 +31,7 @@ function scene:create()
     relayout.add(loadingIconGroup)
     loadingIconGroup:scale(0.7, 0.7)
     for i = 0, 2 do
-        local loading = display.newImageRect(loadingIconGroup, 'images/loading/loading.png', 64, 64)
+        local loading = display.newImageRect(loadingIconGroup, 'images/misc/loading/loading.png', 64, 64)
         loading.x = 0
         loading.y = 0
         loading.anchorX = 5

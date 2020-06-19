@@ -1,8 +1,9 @@
 local composer = require('composer')
-local sounds = require('libraries.sounds')
-local widget = require('widget')
-local colors = require("classes.colors-rgb")
 local scene = composer.newScene()
+
+local widget = require('widget')
+local sounds = require('libraries.sounds')
+local colors = require("libraries.colors-rgb")
 
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
@@ -30,7 +31,7 @@ local function setUpDisplay(grp)
     background:setFillColor(gradient_options)
     grp:insert(background)
 
-    local title_logo = display.newImageRect(grp, "images/backgrounds/gameover.png", 713, 85)
+    local title_logo = display.newImageRect(grp, "images/gameover scene/gameover.png", 713, 85)
     title_logo.x = centerX
     title_logo.y = centerY - 100
     title_logo:scale(0.6, 0.6)

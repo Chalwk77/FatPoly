@@ -1,8 +1,9 @@
 local composer = require('composer')
-local colors = require('classes.colors-rgb')
-local sounds = require('libraries.sounds')
 local scene = composer.newScene()
+
 local widget = require('widget')
+local sounds = require('libraries.sounds')
+local colors = require('libraries.colors-rgb')
 
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
@@ -35,7 +36,7 @@ local function setUpDisplay(grp)
     local width = (display.contentWidth / 2)
     local height = (display.contentHeight / 2)
 
-    local bg = display.newImage("images/backgrounds/levelselectbg.png")
+    local bg = display.newImage("images/level select scene/background.png")
     bg.xScale = width / width
     bg.yScale = bg.xScale
     bg.x = centerX
@@ -44,7 +45,7 @@ local function setUpDisplay(grp)
     bg:scale(0.5, 0.5)
     grp:insert(bg)
 
-    local logo = display.newImage("images/backgrounds/selectlevel.png")
+    local logo = display.newImage("images/level select scene/title-logo.png")
     logo.xScale = width / width
     logo.yScale = bg.xScale
     logo.x = centerX
@@ -71,8 +72,8 @@ local function setUpDisplay(grp)
     })
 
     local backButton = widget.newButton({
-        defaultFile = "images/buttons/backbutton.png",
-        overFile = "images/buttons/backbutton-over.png",
+        defaultFile = "images/buttons/back.png",
+        overFile = "images/buttons/back-over.png",
         onRelease = function()
             sounds.play("onTap")
             composer.gotoScene("scenes.menu", { effect = "crossFade", time = 300 })
@@ -95,8 +96,8 @@ local function setUpDisplay(grp)
             font = native.systemFontBold,
             fontSize = 15,
             labelYOffset = -50,
-            defaultFile = 'images/backgrounds/level.png',
-            overFile = 'images/backgrounds/level-over.png',
+            defaultFile = 'images/level select scene/level.png',
+            overFile = 'images/level select scene/level-over.png',
             width = 64,
             height = 64,
             x = x * spacing + 240,
@@ -124,9 +125,9 @@ function scene:show()
     local spacing = 100
     for i = 1, 10 do
         if (game.levels[i][1]) then
-            padlock = display.newImage("images/backgrounds/padlock_unlocked.png")
+            padlock = display.newImage("images/level select scene/padlock-unlocked.png")
         else
-            padlock = display.newImage("images/backgrounds/padlock_locked.png")
+            padlock = display.newImage("images/level select scene/padlock-locked.png")
         end
         padlock.x = x * spacing + 240
         padlock.y = 100 + y * spacing + 33

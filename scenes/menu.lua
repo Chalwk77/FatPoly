@@ -5,7 +5,7 @@ local json = require("libraries.json")
 local widget = require('widget')
 local sounds = require('libraries.sounds')
 local physics = require("physics")
-local colors = require("classes.colors-rgb")
+local colors = require("libraries.colors-rgb")
 
 local menu_tPrevious = system.getTimer()
 local centerX = display.contentCenterX
@@ -34,7 +34,11 @@ local function setUpDisplay(grp)
     local real_H = display.actualContentHeight
     local real_W = display.actualContentWidth
 
-    local background = display.newImage("images/backgrounds/background.png")
+
+    --
+    -- RENDER BACKGROUND:
+    --
+    local background = display.newImage("images/menu scene/menu-background.png")
     background.xScale = (background.contentWidth * 0.5) / background.contentWidth
     background.yScale = background.xScale
     background.x = centerX
@@ -43,6 +47,9 @@ local function setUpDisplay(grp)
     background.alpha = 0.30
     grp:insert(background)
 
+    --
+    -- RENDER GAME ICON CUBE:
+    --
     local icon = display.newImage("Icon.png")
     icon.x = real_W * 0.5 - 172
     icon.y = real_H * 0.5 + 93
@@ -51,7 +58,10 @@ local function setUpDisplay(grp)
     icon:scale(0.2, 0.2)
     grp:insert(icon)
 
-    local logo = display.newImage("images/backgrounds/logo.png")
+    --
+    -- RENDER GAME TITLE LOGO:
+    --
+    local logo = display.newImage("images/menu scene/logo.png")
     logo.x = centerX
     logo.y = centerY - 100
     logo.alpha = 1
@@ -63,8 +73,8 @@ local function setUpDisplay(grp)
     ------------------
     local startBtn = widget.newButton({
         id = "scenes.chooselevel",
-        defaultFile = "images/backgrounds/start.png",
-        overFile = "images/backgrounds/start.png",
+        defaultFile = "images/buttons/start.png",
+        overFile = "images/buttons/start-over.png",
         onRelease = switchScene
     })
 
@@ -88,8 +98,8 @@ local function setUpDisplay(grp)
     --------------------
     local optionsBtn = widget.newButton({
         id = "scenes.options",
-        defaultFile = "images/backgrounds/optionslogo.png",
-        overFile = "images/backgrounds/optionslogo_over.png",
+        defaultFile = "images/buttons/options.png",
+        overFile = "images/buttons/options-over.png",
         onRelease = switchScene
     })
 
@@ -104,8 +114,8 @@ local function setUpDisplay(grp)
     ------------------
     local aboutBtn = widget.newButton({
         id = "scenes.about",
-        defaultFile = "images/backgrounds/aboutbtn.png",
-        overFile = "images/backgrounds/aboutbtn_over.png",
+        defaultFile = "images/buttons/about.png",
+        overFile = "images/buttons/about-over.png",
         onRelease = switchScene
     })
 

@@ -1,3 +1,6 @@
+local composer = require('composer')
+local scene = composer.newScene()
+
 local gameIsOver
 local rewardLabel
 local penaltyLabel
@@ -27,21 +30,11 @@ local objects = { }
 local health = { }
 health.hearts = { }
 health.bar = require('modules.healthbar')
-
-local widget = require('widget')
-local pause = require("modules.pause")
-local json = require("libraries.json")
 local physics = require("physics")
+local json = require("libraries.json")
 local sounds = require('libraries.sounds')
-local colors = require('classes.colors-rgb')
-local composer = require('composer')
-local scene = composer.newScene()
-
-local collision_dimensions = {
-    { w = 191, h = 180 },
-    { w = 203, h = 185 },
-    { w = 196, h = 175 },
-}
+local sidebar = require("modules.sidebar")
+local colors = require('libraries.colors-rgb')
 
 local health_params
 local function initHealthParams()
@@ -57,7 +50,8 @@ end
 
 local lightning_effect = { }
 local function LoadLightningEffects()
-    local dir = 'images/particle effects/combo particles/'
+    local collision_dimensions = { { w = 191, h = 180 }, { w = 203, h = 185 }, { w = 196, h = 175 } }
+    local dir = 'images/misc/particle effects/combo particles/'
     for i = 1, 3 do
         local p = display.newImageRect(dir .. i .. '.png', collision_dimensions[i].w, collision_dimensions[i].h)
         p.alpha = 0
@@ -91,10 +85,10 @@ end
 local function setUpDisplay(grp)
 
     display.setStatusBar(display.HiddenStatusBar)
-    pause:new()
+    sidebar:new()
     LoadLightningEffects()
 
-    local background = display.newImage(grp, "images/backgrounds/background.png")
+    local background = display.newImage(grp, "images/menu scene/menu-background.png")
     background.xScale = (background.contentWidth / background.contentWidth)
     background.yScale = background.xScale
     background.x = display.contentWidth / 2
@@ -106,14 +100,14 @@ local function setUpDisplay(grp)
     local CX = ContentW / 2
     local CY = (ContentH / 2)
 
-    local RePen = { 
+    local RePen = {
         x = CX,
         y = CY + CY - 28,
         strokeWidth = 2,
         strokeColor = colors.RGB("green")
     }
-    
-    revolving_image = display.newImageRect('images/loading/loading2.png', 64, 64)
+
+    revolving_image = display.newImageRect('images/misc/powerups/revolve.png', 64, 64)
     revolving_image.x = 0
     revolving_image.y = 0
     revolving_image.alpha = 0.50
@@ -229,7 +223,7 @@ function scene:show(event)
 
         local rate = 500
         for i = 1, 5 do
-            health.hearts[i] = display.newImageRect("images/backgrounds/heart" .. tostring(i) .. ".png", 12, 12)
+            health.hearts[i] = display.newImageRect("images/misc/hearts/heart" .. tostring(i) .. ".png", 12, 12)
             health.hearts[i].x = ContentW / 2 + 170
             health.hearts[i].y = ContentH / 2 - 120
             health.hearts[i].alpha = 0.75
@@ -322,9 +316,10 @@ local function gameOver()
     penaltyBar.isVisible = false
     penaltyLabel.isVisible = false
 
-    player.isVisible = false
+    -- Remove player:
+    player:removeSelf()
 
-    -- HIDE: health bar & hearts --
+    -- HIDE health bar & hearts;
     health.bar.isVisible = false
     for i = 1, 5 do
         health.hearts[i].isVisible = false
@@ -468,9 +463,9 @@ end
 
 local function gameSpecial(objectType)
     local r = math.random(1, 4)
-    
+
     revolving_image.rotation = 0
-    
+
     if (objectType == "reward") then
         if (r == 1) then
             player.width = (player.width / 2)
@@ -489,10 +484,10 @@ local function gameSpecial(objectType)
             local oW = player.width
             local oH = player.height
             transition.to(player, {
-                time = 3000, 
+                time = 3000,
                 delay = 3000,
-                width = (oW - oW/2), 
-                height = (oH - oH/2), 
+                width = (oW - oW / 2),
+                height = (oH - oH / 2),
                 onComplete = function(p)
                     p.width = oW
                     p.height = oH
@@ -565,10 +560,10 @@ local function gameSpecial(objectType)
             local oW = player.width
             local oH = player.height
             transition.to(player, {
-                time = 3000, 
+                time = 3000,
                 delay = 3000,
-                width = (oW + oW/2), 
-                height = (oH + oH/2), 
+                width = (oW + oW / 2),
+                height = (oH + oH / 2),
                 onComplete = function(p)
                     p.width = oW
                     p.height = oH
@@ -679,7 +674,7 @@ local function OnTick(event)
         local lvl = game.current_level
         local required = game.levels[lvl][2]
         levelLabel.text = "Level: " .. lvl .. "/" .. required
-        
+
         if (revolving_image.isVisible) then
             revolving_image.x = player.x
             revolving_image.y = player.y
@@ -826,6 +821,21 @@ local function onCollision(event)
 
             if (health.amount < 1) then
                 gameOver()
+            else
+                local hit = display.newImageRect('images/misc/particle effects/hit.png', 180, 182)
+                hit.x, hit.y = player.x, player.y
+                local fromScale, toScale = 0.3, 0.7
+                hit:scale(fromScale, fromScale)
+                hit:setFillColor(1, 0.9, 0.5)
+                transition.to(hit, {
+                    time = 100,
+                    xScale = toScale,
+                    yScale = toScale,
+                    alpha = 0.50,
+                    onComplete = function(object)
+                        object:removeSelf()
+                    end
+                })
             end
         elseif (ot == "reward") or (ot == "penalty") then
             sounds.play("onPowerup")

@@ -3,7 +3,7 @@ local scene = composer.newScene()
 local widget = require('widget')
 local sounds = require('libraries.sounds')
 local databox = require('libraries.databox')
-local colors = require('classes.colors-rgb')
+local colors = require('libraries.colors-rgb')
 
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
@@ -40,7 +40,7 @@ local function setUpDisplay(grp)
     --
     -- Scene Title Logo:
     --
-    local title_logo = display.newImageRect("images/backgrounds/options2.png", 636, 208)
+    local title_logo = display.newImageRect("images/options scene/logo.png", 636, 208)
     title_logo.x = centerX
     title_logo.y = centerY - 80
     title_logo:scale(0.6, 0.6)
@@ -64,8 +64,8 @@ local function setUpDisplay(grp)
     --
     local backButton = widget.newButton({
         id = "scenes.menu",
-        defaultFile = "images/buttons/backbutton.png",
-        overFile = "images/buttons/backbutton-over.png",
+        defaultFile = "images/buttons/back.png",
+        overFile = "images/buttons/back-over.png",
         onRelease = switchScene
     })
     backButton.x = width - width + 20

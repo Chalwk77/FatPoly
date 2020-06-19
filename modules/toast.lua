@@ -2,7 +2,7 @@ module(..., package.seeall)
 local trueDestroy
 local destroy
 
-local colors = require('classes.colors-rgb')
+local colors = require('libraries.colors-rgb')
 function trueDestroy(toast)
     toast:removeSelf();
     toast = nil;
