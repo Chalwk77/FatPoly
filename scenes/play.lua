@@ -5,6 +5,7 @@ local rewardBar
 local penaltyBar
 local scoreLabel
 local highScoreLabel
+local revolving_image
 local levelLabel
 local player
 
@@ -105,35 +106,53 @@ local function setUpDisplay(grp)
     local CX = ContentW / 2
     local CY = (ContentH / 2)
 
+    local RePen = { 
+        x = CX,
+        y = CY + CY - 28,
+        strokeWidth = 2,
+        strokeColor = colors.RGB("green")
+    }
+    
+    revolving_image = display.newImageRect('images/loading/loading2.png', 64, 64)
+    revolving_image.x = 0
+    revolving_image.y = 0
+    revolving_image.alpha = 0.50
+    revolving_image.isVisible = false
+    grp:insert(revolving_image)
+
     rewardLabel = display.newText("reward", CX, CY, native.systemFontBold, 18)
     rewardLabel:setTextColor(colors.RGB("green"))
-    rewardLabel.x = CX
-    rewardLabel.y = CY + CY - 55
-    rewardLabel.alpha = 0.50
+    rewardLabel.x = RePen.x
+    rewardLabel.y = RePen.y
+    rewardLabel.alpha = 1
     rewardLabel.isVisible = false
     grp:insert(rewardLabel)
 
     rewardBar = display.newRect(100, CX, CY, 30)
     rewardBar:setFillColor(colors.RGB("white"))
-    rewardBar.x = CX
-    rewardBar.y = CY + CY - 28
+    rewardBar.x = RePen.x
+    rewardBar.y = RePen.y
     rewardBar.alpha = 0.20
+    rewardBar.strokeWidth = RePen.strokeWidth
+    rewardBar:setStrokeColor(RePen.strokeColor)
     rewardBar.isVisible = false
     grp:insert(rewardBar)
 
     penaltyLabel = display.newText("penalty", CX, CY, native.systemFontBold, 18)
     penaltyLabel:setTextColor(colors.RGB("red"))
-    penaltyLabel.x = CX
-    penaltyLabel.y = CY + CY - 55
-    penaltyLabel.alpha = 0.50
+    penaltyLabel.x = RePen.x
+    penaltyLabel.y = RePen.y
+    penaltyLabel.alpha = 1
     penaltyLabel.isVisible = false
     grp:insert(penaltyLabel)
 
     penaltyBar = display.newRect(100, CX, CY, 30)
     penaltyBar:setFillColor(colors.RGB("white"))
-    penaltyBar.x = CX
-    penaltyBar.y = CY + CY - 28
+    penaltyBar.x = RePen.x
+    penaltyBar.y = RePen.y
     penaltyBar.alpha = 0.20
+    penaltyBar.strokeWidth = RePen.strokeWidth
+    penaltyBar:setStrokeColor(RePen.strokeColor)
     penaltyBar.isVisible = false
     grp:insert(penaltyBar)
 
@@ -449,6 +468,9 @@ end
 
 local function gameSpecial(objectType)
     local r = math.random(1, 4)
+    
+    revolving_image.rotation = 0
+    
     if (objectType == "reward") then
         if (r == 1) then
             player.width = (player.width / 2)
@@ -464,18 +486,33 @@ local function gameSpecial(objectType)
                 rewardLabel.isVisible = false
             end
             transition.to(rewardLabel, { time = 1000, delay = 2000, onComplete = Hide })
+            local oW = player.width
+            local oH = player.height
+            transition.to(player, {
+                time = 3000, 
+                delay = 3000,
+                width = (oW - oW/2), 
+                height = (oH - oH/2), 
+                onComplete = function(p)
+                    p.width = oW
+                    p.height = oH
+                end
+            })
         elseif (r == 2) then
             rewardLabel.text = "all you can eat"
             spawnConstraint = "allyoucaneat"
             rewardBar.isVisible = true
             rewardLabel.isVisible = true
+            revolving_image.isVisible = true
             local closure = function()
                 spawnConstraint = "no"
                 rewardBar.width = 280
                 rewardBar.isVisible = false
                 rewardLabel.isVisible = false
+                revolving_image.isVisible = false
             end
             transition.to(rewardBar, { time = 5000, width = 0, onComplete = closure })
+            transition.to(revolving_image, { time = 5000, rotation = 360 })
         elseif (r == 3) then
             if (speedFactor ~= 1) then
                 return
@@ -483,6 +520,7 @@ local function gameSpecial(objectType)
             rewardLabel.text = "traffic jam"
             rewardBar.isVisible = true
             rewardLabel.isVisible = true
+            revolving_image.isVisible = true
             transition.to(rewardLabel, { time = 500, delay = 4500 })
             speedFactor = 0.5
             calculateNewVelocity(objects)
@@ -493,8 +531,10 @@ local function gameSpecial(objectType)
                 rewardBar.width = 280
                 rewardBar.isVisible = false
                 rewardLabel.isVisible = false
+                revolving_image.isVisible = false
             end
             transition.to(rewardBar, { time = 5000, width = 0, onComplete = closure })
+            transition.to(revolving_image, { time = 5000, rotation = 360 })
         elseif (r == 4) then
             rewardLabel.txt = "+25 health"
             rewardLabel.isVisible = true
@@ -522,19 +562,34 @@ local function gameSpecial(objectType)
                 penaltyLabel.isVisible = false
             end
             transition.to(penaltyLabel, { time = 1000, delay = 3000, onComplete = Hide })
+            local oW = player.width
+            local oH = player.height
+            transition.to(player, {
+                time = 3000, 
+                delay = 3000,
+                width = (oW + oW/2), 
+                height = (oH + oH/2), 
+                onComplete = function(p)
+                    p.width = oW
+                    p.height = oH
+                end
+            })
         elseif (r == 2) then
             penaltyLabel.text = "food contaminated"
             transition.to(penaltyLabel, { time = 500, delay = 4500 })
             penaltyBar.isVisible = true
             penaltyLabel.isVisible = true
+            revolving_image.isVisible = true
             spawnConstraint = "foodcontaminated"
             local closure = function()
                 spawnConstraint = "no"
                 penaltyBar.width = 280
                 penaltyBar.isVisible = false
                 penaltyLabel.isVisible = false
+                revolving_image.isVisible = false
             end
             transition.to(penaltyBar, { time = 5000, width = 0, onComplete = closure })
+            transition.to(revolving_image, { time = 5000, rotation = 360 })
         else
             if (speedFactor ~= 1) then
                 return
@@ -544,6 +599,7 @@ local function gameSpecial(objectType)
             speedFactor = 2
             calculateNewVelocity(objects)
             penaltyBar.isVisible = true
+            revolving_image.isVisible = true
             penaltyLabel.isVisible = true
             local closure = function()
                 speedFactor = 0.5
@@ -552,8 +608,10 @@ local function gameSpecial(objectType)
                 penaltyBar.width = 280
                 penaltyBar.isVisible = false
                 penaltyLabel.isVisible = false
+                revolving_image.isVisible = false
             end
             transition.to(penaltyBar, { time = 5000, width = 0, onComplete = closure })
+            transition.to(revolving_image, { time = 5000, rotation = 360 })
         end
     end
 end
@@ -621,6 +679,11 @@ local function OnTick(event)
         local lvl = game.current_level
         local required = game.levels[lvl][2]
         levelLabel.text = "Level: " .. lvl .. "/" .. required
+        
+        if (revolving_image.isVisible) then
+            revolving_image.x = player.x
+            revolving_image.y = player.y
+        end
     end
 
     local tDelta = event.time - tPrevious
