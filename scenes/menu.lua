@@ -7,6 +7,8 @@ local sounds = require('libraries.sounds')
 local physics = require("physics")
 local colors = require("libraries.colors-rgb")
 
+--require("modules.mouse_debug")
+
 local menu_tPrevious = system.getTimer()
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
@@ -34,6 +36,22 @@ local function setUpDisplay(grp)
     local real_H = display.actualContentHeight
     local real_W = display.actualContentWidth
 
+    local borders = {
+        strokeWidth = 7,
+        alpha = 1,
+        { 0, 0, real_W, 0, }, -- top
+        { real_W, real_H, 0, real_H }, -- bottom
+        { 0, real_H, 0, 0 }, -- left
+        { real_W, 0, real_W, real_H }, -- right
+    }
+
+    for i = 1, #borders do
+        local line = display.newLine(borders[i][1], borders[i][2], borders[i][3], borders[i][4])
+        line:setStrokeColor(colors.RGB("lightskyblue"))
+        line.strokeWidth = borders.strokeWidth
+        line.alpha = borders.alpha
+        grp:insert(line)
+    end
 
     --
     -- RENDER BACKGROUND:
@@ -51,8 +69,8 @@ local function setUpDisplay(grp)
     -- RENDER GAME ICON CUBE:
     --
     local icon = display.newImage("Icon.png")
-    icon.x = real_W * 0.5 - 172
-    icon.y = real_H * 0.5 + 93
+    icon.x = real_W * 0.5 - 169
+    icon.y = real_H * 0.5 + 90
     icon.rotation = 45
     icon.alpha = 0.50
     icon:scale(0.2, 0.2)
@@ -157,28 +175,6 @@ function scene:show(event)
         SpawnObject("poison", randomSpeed(), 0)
         SpawnObject("poison", -randomSpeed(), 0)
         SpawnObject("reward", randomSpeed(), 0)
-
-        --local size = math.random(1, 2)
-        --local rotation = 360
-        --if (size == 1) then
-        --    rotation = -rotation
-        --end
-        --
-        --local oXs = logo.xScale
-        --local oYs = logo.yScale
-        --
-        --local ReSize = function()
-        --    logo:scale(oXs, oYs)
-        --end
-        --transition.to(logo, {
-        --    delta = true,
-        --    rotation = rotation,
-        --    alpha = 1,
-        --    time = 1000,
-        --    xScale = oXs,
-        --    yScale = oYs,
-        --    onComplete = ReSize
-        --})
     end
 end
 
@@ -198,6 +194,8 @@ function randomSpeed()
 end
 
 function SpawnObject(objectType, xVelocity, yVelocity)
+
+    objectType = "reward"
 
     if (spawn_particles) then
 

@@ -1,27 +1,36 @@
+local colors = require("libraries.colors-rgb")
+
 local mouse = { }
 
-function mouse:Hover(event)
+local centerX = display.contentCenterX
+local centerY = display.contentCenterY
+
+local o = display.newRect(centerX, centerY, 64, 64)
+
+function Hover(event)
     mouse.x, mouse.y = event.x, event.y
 end
 
-function mouse:intersecting(mX, mY, pX, pY, W, H)
-    if ((mX > pX) and (mX < pX + W) and (mY > pY) and (mY < pY + H)) then
-        return true
+function intersecting(mx, my, x, y, w, h)
+    local dist = (mx - x) ^ 2 + (my - y) ^ 2
+    if (dist <= 1000) then
+        return true, print('true')
     end
 end
 
-function mouse:OnTick(object)
+function OnTick()
     if (mouse.x and mouse.y) then
-        local hovering = mouse:intersecting(mouse.x, mouse.y, object.x, object.y, object.width, object.height)
+        local hovering = intersecting(mouse.x, mouse.y, o.x, o.y, o.width, o.height)
         if (hovering) then
-            object:setStrokeColor(0 / 255, 255 / 255, 0 / 255)
+            o:setStrokeColor(colors.RGB("green"))
+            o.strokeWidth = 5
         else
-            object:setStrokeColor(colors.RGB("white"))
+            o:setStrokeColor(colors.RGB("red"))
+            o.strokeWidth = 5
         end
     end
-
 end
 
-Runtime:addEventListener("enterFrame", mouse:OnTick())
-Runtime:addEventListener("mouse", mouse:Hover())
+Runtime:addEventListener("enterFrame", OnTick)
+Runtime:addEventListener("mouse", Hover)
 return mouse

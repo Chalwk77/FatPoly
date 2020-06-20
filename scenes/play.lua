@@ -64,6 +64,8 @@ end
 --
 -- COMMON SCREEN COORDINATES:
 --
+local real_H = display.actualContentHeight
+local real_W = display.actualContentWidth
 local ContentW = display.viewableContentWidth
 local ContentH = display.viewableContentHeight
 
@@ -174,28 +176,28 @@ local function setUpDisplay(grp)
     levelLabel.isVisible = false
     grp:insert(levelLabel)
 
-    local topY = display.screenOriginY
-    local bottomY = (display.contentHeight - display.screenOriginY)
-    local leftX = display.screenOriginX
-    local rightX = (display.contentWidth - display.screenOriginX)
-    local screenW = (rightX - leftX)
-
-    local border = {
-        top = { leftX + screenW, topY, rightX - screenW, topY },
-        bottom = { leftX + screenW, bottomY, rightX - screenW, bottomY },
-        left = { 0, topY, 0, bottomY },
-        right = { leftX + screenW, topY, leftX + screenW, bottomY }
+    borders = {
+        strokeWidth = 7,
+        alpha = 1,
+        { 0, 0, real_W, 0, }, -- top
+        { real_W, real_H, 0, real_H }, -- bottom
+        { 0, real_H, 0, 0 }, -- left
+        { real_W, 0, real_W, real_H }, -- right
+        color = function()
+            local R = math.random(0, 255)
+            local G = math.random(0, 255)
+            local B = math.random(0, 255)
+            return R / 255, G / 255, B / 255
+        end
     }
 
-    local i = 1
-    for k, _ in pairs(border) do
-        local line = display.newLine(border[k][1], border[k][2], border[k][3], border[k][4])
-        line.strokeWidth = 15
-        line.alpha = 0.50
+    for i = 1, #borders do
+        local line = display.newLine(borders[i][1], borders[i][2], borders[i][3], borders[i][4])
         line:setStrokeColor(colors.RGB("red"))
+        line.strokeWidth = borders.strokeWidth
+        line.alpha = borders.alpha
         grp:insert(line)
-        borders[i] = line
-        i = i + 1
+        borders[i].object = line
     end
 end
 
@@ -638,17 +640,15 @@ local function OnTick(event)
 
         --[[
         -- Call mouse intersect collision function:
-        --
-        if (mouse.x and mouse.y) then
-            local hovering = intersecting(mouse.x, mouse.y, player.x, player.y)
-            if (hovering) then
-                player:setStrokeColor(0/255, 255/255, 0/255)
-            else
-                player:setStrokeColor(colors.RGB("white"))
-            end
-        end
-        --
         --]]
+        --if (mouse.x and mouse.y) then
+        --    local hovering = intersecting(mouse.x, mouse.y, player.x, player.y)
+        --    if (hovering) then
+        --        player:setStrokeColor(0/255, 255/255, 0/255)
+        --    else
+        --        player:setStrokeColor(colors.RGB("white"))
+        --    end
+        --end
 
 
         --
@@ -767,11 +767,9 @@ local function onCollision(event)
             end
             o.isVisible = false
 
-            local R = math.random(0, 255)
-            local G = math.random(0, 255)
-            local B = math.random(0, 255)
-            for i = 1, 4 do
-                borders[i]:setStrokeColor(R / 255, G / 255, B / 255, 1)
+            local R, G, B = borders.color()
+            for i = 1, #borders do
+                borders[i].object:setStrokeColor(R, G, B)
             end
 
             local current_level = game.current_level
