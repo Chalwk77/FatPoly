@@ -1,7 +1,6 @@
 local composer = require('composer')
 local scene = composer.newScene()
 
-local json = require("libraries.json")
 local widget = require('widget')
 local sounds = require('libraries.sounds')
 local physics = require("physics")
@@ -167,7 +166,6 @@ function scene:show(event)
     local grp = self.view
     local phase = event.phase
     if (phase == "will") then
-        game = loadStats()
         CheckForUpdates(grp)
         spawn_particles = true
     elseif (phase == "did") then

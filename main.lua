@@ -2,9 +2,9 @@
 
 local composer = require('composer')
 local sounds = require('libraries.sounds')
-local json = require("libraries.json")
+local json = require("json")
 
-local stats_file = "stats.json"
+local path = system.pathForFile('stats.json', system.DocumentsDirectory)
 
 game = { }
 app_version = "1.0.0"
@@ -17,28 +17,18 @@ AnimatePowerUp = function(Obj)
     transition.to(Obj, { time = 255, alpha = 1, xScale = 1, yScale = 1, onComplete = scaleUp })
 end
 
-loadStats = function()
-    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
-    local content
-    local file = io.open(path, "r")
-    if (file ~= nil) then
-        content = file:read("*all")
+saveData = function()
+    local file = io.open(path, 'w')
+    if file then
+        file:write(json.encode_pretty(game))
         io.close(file)
     end
-    return json:decode(content)
 end
 
-UpdateStats = function()
-    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
-    local content
-    local file = io.open(path, "r")
-    if (file ~= nil) then
-        content = file:read("*all")
-        io.close(file)
-    end
-    local file = assert(io.open(path, "w"))
-    if (file) then
-        file:write(json:encode_pretty(game))
+local function loadData()
+    local file = io.open(path, 'r')
+    if file then
+        game = json.decode(file:read('*a'))
         io.close(file)
     end
 end
@@ -71,20 +61,19 @@ local function Keys(event)
 end
 
 function CheckFile()
-    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
     local file = io.open(path, "a")
-    if (file ~= nil) then
+    if (file) then
         io.close(file)
     end
     local content
     local file = io.open(path, "r")
-    if (file ~= nil) then
+    if (file) then
         content = file:read("*all")
         io.close(file)
     end
     local file = assert(io.open(path, "w"))
     if (file) then
-        local data = json:decode(content)
+        local data = json.decode(content)
         if (data == nil) then
             data = {
                 color = "default_color",
@@ -105,12 +94,13 @@ function CheckFile()
                 }
             }
         end
-        file:write(json:encode_pretty(data))
+        file:write(json.prettify(data))
         io.close(file)
     end
 end
 
 CheckFile()
+loadData()
 
 system.setIdleTimer(false)
 Runtime:addEventListener("key", Keys)

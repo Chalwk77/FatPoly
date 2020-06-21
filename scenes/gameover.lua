@@ -70,7 +70,7 @@ function scene:show(event)
         highScoreLabel.isVisible = true
 
     elseif (phase == "did") then
-        UpdateStats()
+        saveData()
     end
 end
 
