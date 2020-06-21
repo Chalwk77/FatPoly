@@ -260,7 +260,9 @@ end
 function scene:hide(event)
     local phase = event.phase
     if (phase == "will") then
-        CleanUpScene()
+        if (not gameIsOver) then
+            CleanUpScene()
+        end
     elseif (phase == "did") then
         -- N/A
     end
@@ -621,6 +623,7 @@ function OnTick(event)
     end
 
     if (player) then
+
         if (player.resize) then
 
             local weight_percentage = 1.900

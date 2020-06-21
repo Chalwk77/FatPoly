@@ -203,7 +203,7 @@ end
 function Hover(m)
     for i = 1, #buttons do
         local dist = (m.x - buttons[i].x) ^ 2 + (m.y - buttons[i].y) ^ 2
-        if (dist <= 1000) then
+        if (dist <= 500) then
             buttons[i].line.isVisible = true
         else
             buttons[i].line.isVisible = false
