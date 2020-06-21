@@ -53,7 +53,7 @@ local function setUpDisplay(grp)
     backButton.x = width - width + 20
     backButton.y = height - height + 20
     backButton.alpha = 1
-    backButton:scale(0.30, 0.30)
+    backButton:scale(0.25, 0.25)
     grp:insert(backButton)
 end
 

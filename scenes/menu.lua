@@ -7,8 +7,6 @@ local sounds = require('libraries.sounds')
 local physics = require("physics")
 local colors = require("libraries.colors-rgb")
 
---require("modules.mouse_debug")
-
 local menu_tPrevious = system.getTimer()
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
@@ -152,8 +150,9 @@ local function setUpDisplay(grp)
         local offset = 17
         local height = buttons[i].y + offset
         local line = display.newLine(x1, height, x2, height)
-        line:setStrokeColor(colors.RGB("green"))
-        line.strokeWidth = 2
+        line:setStrokeColor(colors.RGB("white"))
+        line.strokeWidth = 1
+        line.isVisible = false
         buttons[i].line = line
     end
 end
@@ -181,6 +180,7 @@ function scene:show(event)
         SpawnObject("poison", randomSpeed(), 0)
         SpawnObject("poison", -randomSpeed(), 0)
         SpawnObject("reward", randomSpeed(), 0)
+        Runtime:addEventListener("mouse", Hover)
     end
 end
 
@@ -188,6 +188,11 @@ function scene:hide(event)
     local phase = event.phase
     if (phase == "will") then
         spawn_particles = false
+
+        Runtime:removeEventListener("mouse", Hover)
+        for i = 1, #buttons do
+            buttons[i].line.isVisible = false
+        end
         for _, v in pairs(particles) do
             v:removeSelf()
         end
@@ -195,7 +200,7 @@ function scene:hide(event)
     end
 end
 
-local function Hover(m)
+function Hover(m)
     for i = 1, #buttons do
         local dist = (m.x - buttons[i].x) ^ 2 + (m.y - buttons[i].y) ^ 2
         if (dist <= 1000) then
@@ -395,6 +400,5 @@ physics.setScale(60)
 physics.setGravity(0, 0)
 
 Runtime:addEventListener("enterFrame", AnimateMenu)
-Runtime:addEventListener("mouse", Hover)
 
 return scene

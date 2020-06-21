@@ -50,7 +50,7 @@ local function setUpDisplay(grp)
     logo.yScale = bg.xScale
     logo.x = centerX
     logo.y = centerY - 120
-    logo:scale(0.6, 1)
+    logo:scale(0.5, 1)
     logo.alpha = 1
     grp:insert(logo)
 
@@ -82,7 +82,7 @@ local function setUpDisplay(grp)
     backButton.x = width - width + 20
     backButton.y = height - height + 20
     backButton.alpha = 1
-    backButton:scale(0.30, 0.30)
+    backButton:scale(0.25, 0.25)
     grp:insert(backButton)
 
     local x, y = -2, 0

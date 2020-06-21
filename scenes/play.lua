@@ -75,7 +75,6 @@ local ContentH = display.contentHeight
 local function setUpDisplay(grp)
 
     display.setStatusBar(display.HiddenStatusBar)
-    sidebar:new()
     LoadLightningEffects()
 
     local background = display.newImage(grp, "images/menu scene/menu-background.png")
@@ -187,6 +186,8 @@ local function setUpDisplay(grp)
         grp:insert(line)
         borders[i].object = line
     end
+
+    sidebar:new()
 end
 
 function scene:create(event)
@@ -199,6 +200,8 @@ end
 function scene:show(event)
     local phase = event.phase
     if (phase == "will") then
+
+        sidebar.pause_button.isVisible = true
 
         SetLevelSpeed()
         initHealthParams()
@@ -248,11 +251,19 @@ function scene:show(event)
 
         -- Play Background music: (loop)
         --sounds.playStream('game_music')
+
+        Runtime:addEventListener("collision", onCollision)
+        Runtime:addEventListener("enterFrame", OnTick)
     end
 end
 
 function scene:hide(event)
-
+    local phase = event.phase
+    if (phase == "will") then
+        CleanUpScene()
+    elseif (phase == "did") then
+        -- N/A
+    end
 end
 
 function scene:destroy(event)
@@ -278,6 +289,7 @@ function createPlayer(x, y, width, height, rotation, visible)
     player.y = y
     player.anchorX = 0.5
     player.anchorY = 0.5
+
     player:setFillColor(colors.RGB(game.color))
     player:setStrokeColor(colors.RGB("white"))
     player.strokeWidth = 1.2
@@ -297,8 +309,10 @@ local function calculateNewVelocity(t)
     end
 end
 
-local function gameOver()
-    gameIsOver = true
+function CleanUpScene()
+
+    sidebar:hide()
+    sidebar.pause_button.isVisible = false
 
     -- Hide Reward|Penalty (bars & text)
     rewardBar.isVisible = false
@@ -308,6 +322,7 @@ local function gameOver()
 
     -- Remove player:
     player:removeSelf()
+    player = nil
 
     -- HIDE health bar & hearts;
     health.bar.isVisible = false
@@ -317,9 +332,21 @@ local function gameOver()
 
     -- Remove objects:
     for _, v in pairs(objects) do
-        v:removeSelf()
+        if (v) then
+            v:removeSelf()
+        end
     end
     objects = { }
+
+    Runtime:removeEventListener("enterFrame", OnTick)
+    Runtime:removeEventListener("collision", onCollision)
+end
+
+local function gameOver()
+
+    gameIsOver = true
+
+    CleanUpScene()
 
     -- Update scores:
     game.score = score
@@ -351,23 +378,8 @@ function ConstrainToScreen(object)
     end
 end
 
-local mouse = { }
-local function MouseOver(event)
-    if (gameIsOver) then
-        return
-    end
-    mouse.x, mouse.y = event.x, event.y
-end
-
-function intersecting(mX, mY, pX, pY)
-    local w, h = player.width, player.height
-    if ((mX > pX) and (mX < pX + w) and (mY > pY) and (mY < pY + h)) then
-        return true
-    end
-end
-
 function onTouch(event)
-    if (gameIsOver) then
+    if (gameIsOver) or (sidebar.open) then
         return
     elseif (event.phase == "began") then
         player.isFocus = true
@@ -386,7 +398,7 @@ function onTouch(event)
 end
 
 function Spawn(objectType, xVelocity, yVelocity)
-    if (gameIsOver) then
+    if (gameIsOver) or (sidebar.open) then
         return
     end
 
@@ -602,9 +614,9 @@ local function gameSpecial(objectType)
     end
 end
 
-local function OnTick(event)
+function OnTick(event)
 
-    if (gameIsOver) then
+    if (gameIsOver) or (sidebar.open) then
         return
     end
 
@@ -625,20 +637,6 @@ local function OnTick(event)
             player:removeSelf()
             player = player2
         end
-
-
-        --[[
-        -- Call mouse intersect collision function:
-        --]]
-        --if (mouse.x and mouse.y) then
-        --    local hovering = intersecting(mouse.x, mouse.y, player.x, player.y)
-        --    if (hovering) then
-        --        player:setStrokeColor(0/255, 255/255, 0/255)
-        --    else
-        --        player:setStrokeColor(colors.RGB("white"))
-        --    end
-        --end
-
 
         --
         -- Display Health Bar:
@@ -738,11 +736,12 @@ local function OnTick(event)
     end
 end
 
-local function onCollision(event)
+function onCollision(event)
 
-    if (gameIsOver) then
+    if (gameIsOver) or (sidebar.open) then
         return
     end
+
     if (event.phase == "began") then
         local ot, o
         if (event.object1.objectType == "player") then
@@ -877,14 +876,6 @@ function ShowLightning(x, y)
         end
     })
 end
-
-Runtime:addEventListener("collision", onCollision)
-Runtime:addEventListener("enterFrame", OnTick)
-
---
--- todo: Finish trig calculations for screen coordinates:
---Runtime:addEventListener("mouse", MouseOver)
---------------------------------------------------------
 
 scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)

@@ -1,5 +1,8 @@
 local widget = require("widget")
 local sidebar = {}
+
+local composer = require('composer')
+
 local group = display.newGroup()
 
 local real_H = display.actualContentHeight
@@ -10,39 +13,54 @@ local close_delay = 200
 
 local buttons = {
     {
-        id = "scenes.pause",
         defaultFile = "images/buttons/menu.png",
         overFile = "images/buttons/menu-over.png",
         width = 42,
         height = 42,
+        onRelease = function()
+            composer.gotoScene("scenes.menu", { effect = "crossFade", time = 300 })
+        end
     },
     {
-        id = "scenes.reload_game",
         defaultFile = "images/buttons/restart.png",
         overFile = "images/buttons/restart-over.png",
         width = 42,
         height = 42,
+        onRelease = function()
+            composer.gotoScene("scenes.reload_game", { effect = "crossFade", time = 300 })
+        end
     },
     {
-        id = "scenes.colorselection",
         defaultFile = "images/buttons/colorSelection.png",
         overFile = "images/buttons/colorSelection-over.png",
         width = 42,
         height = 42,
+        onRelease = function()
+            composer.gotoScene("scenes.colorselection", { effect = "crossFade", time = 300 })
+        end
     },
     {
-        id = "scenes.help",
         defaultFile = "images/buttons/help.png",
         overFile = "images/buttons/help-over.png",
         width = 42,
         height = 42,
+        onRelease = function()
+            composer.gotoScene("scenes.about", { effect = "crossFade", time = 300 })
+        end
     },
     {
-        id = "exit",
         defaultFile = "images/buttons/exit.png",
         overFile = "images/buttons/exit-over.png",
         width = 42,
         height = 42,
+        onRelease = function()
+            native.showAlert("Confirm Exit", "Are you sure you want to exit?", { "Yes", "No" },
+                    function(e)
+                        if (e.action == 'clicked' and e.index == 1) then
+                            native.requestExit()
+                        end
+                    end)
+        end
     }
 }
 
@@ -100,6 +118,7 @@ function sidebar:new()
             overFile = buttons[i].overFile,
             width = buttons[i].width,
             height = buttons[i].height,
+            onRelease = buttons[i].onRelease
         })
 
         button.x = self.bar.x
@@ -117,9 +136,7 @@ function sidebar:new()
 end
 
 function sidebar:show()
-
     self.title.isVisible = true
-
     transition.to(group, {
         time = open_delay,
         alpha = 1,
@@ -147,31 +164,35 @@ function sidebar:show()
 end
 
 function sidebar:hide()
-    transition.to(group, {
-        time = close_delay,
-        alpha = 0,
-        x = -group.width,
-        y = group.y,
-        onComplete = function()
-            self.title.isVisible = false
-            self.open = false
-        end
-    })
-    transition.to(self.resume_button, {
-        time = close_delay,
-        alpha = 1,
-        x = real_W - real_W + 35,
-        y = real_H - real_H + 35,
-    })
-    transition.to(self.pause_button, {
-        time = close_delay,
-        alpha = 1,
-        x = real_W - real_W + 35,
-        y = real_H - real_H + 35,
-    })
 
-    self.resume_button.isVisible = false
-    self.pause_button.isVisible = true
+    if (self.open) then
+
+        transition.to(group, {
+            time = close_delay,
+            alpha = 0,
+            x = -group.width,
+            y = group.y,
+            onComplete = function()
+                self.title.isVisible = false
+                self.open = false
+            end
+        })
+        transition.to(self.resume_button, {
+            time = close_delay,
+            alpha = 1,
+            x = real_W - real_W + 35,
+            y = real_H - real_H + 35,
+        })
+        transition.to(self.pause_button, {
+            time = close_delay,
+            alpha = 1,
+            x = real_W - real_W + 35,
+            y = real_H - real_H + 35,
+        })
+
+        self.resume_button.isVisible = false
+        self.pause_button.isVisible = true
+    end
 end
 
 function sidebar:Touch()
