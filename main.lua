@@ -9,7 +9,7 @@ local path = system.pathForFile('stats.json', system.DocumentsDirectory)
 game = { }
 app_version = "1.0.0"
 
--- Global function to animate Power ups in the Menu/Play scenes
+-- Global function to animate Power ups in the Menu/Play scenes:
 AnimatePowerUp = function(Obj)
     local scaleUp = function()
         transition.to(Obj, { time = 255, alpha = 1, xScale = 0.7, yScale = 0.7, onComplete = AnimatePowerUp })
