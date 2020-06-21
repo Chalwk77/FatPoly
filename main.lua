@@ -18,9 +18,9 @@ AnimatePowerUp = function(Obj)
 end
 
 saveData = function()
-    local file = io.open(path, 'w')
-    if file then
-        file:write(json.encode_pretty(game))
+    local file = assert(io.open(path, "w"))
+    if (file) then
+        file:write(json.prettify(game))
         io.close(file)
     end
 end
