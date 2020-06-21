@@ -30,8 +30,8 @@ local objects = { }
 local health = { }
 health.hearts = { }
 health.bar = require('modules.healthbar')
+
 local physics = require("physics")
-local json = require("libraries.json")
 local sounds = require('libraries.sounds')
 local sidebar = require("modules.sidebar")
 local colors = require('libraries.colors-rgb')
@@ -66,23 +66,11 @@ end
 --
 local real_H = display.actualContentHeight
 local real_W = display.actualContentWidth
-local ContentW = display.viewableContentWidth
-local ContentH = display.viewableContentHeight
+local vContentW = display.viewableContentWidth
+local vContentH = display.viewableContentHeight
 
-local function UpdateStats()
-    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
-    local content
-    local file = io.open(path, "r")
-    if (file ~= nil) then
-        content = file:read("*all")
-        io.close(file)
-    end
-    local file = assert(io.open(path, "w"))
-    if (file) then
-        file:write(json:encode_pretty(game))
-        io.close(file)
-    end
-end
+local ContentW = display.contentWidth
+local ContentH = display.contentHeight
 
 local function setUpDisplay(grp)
 
@@ -93,14 +81,14 @@ local function setUpDisplay(grp)
     local background = display.newImage(grp, "images/menu scene/menu-background.png")
     background.xScale = (background.contentWidth / background.contentWidth)
     background.yScale = background.xScale
-    background.x = display.contentWidth / 2
-    background.y = display.contentHeight / 2
+    background.x = ContentW / 2
+    background.y = ContentH / 2
     background.alpha = 0.30
     background:addEventListener("touch", onTouch)
     grp:insert(background)
 
-    local CX = ContentW / 2
-    local CY = (ContentH / 2)
+    local CX = vContentW / 2
+    local CY = vContentH / 2
 
     local RePen = {
         x = CX,
@@ -220,14 +208,14 @@ function scene:show(event)
         gameIsOver = false
 
         -- Create a new player:
-        player = createPlayer(ContentW / 2, ContentH / 2, pW, pH, 0, true)
+        player = createPlayer(vContentW / 2, vContentH / 2, pW, pH, 0, true)
         speedFactor = 1
 
         local rate = 500
         for i = 1, 5 do
             health.hearts[i] = display.newImageRect("images/misc/hearts/heart" .. tostring(i) .. ".png", 12, 12)
-            health.hearts[i].x = ContentW / 2 + 170
-            health.hearts[i].y = ContentH / 2 - 120
+            health.hearts[i].x = vContentW / 2 + 170
+            health.hearts[i].y = vContentH / 2 - 120
             health.hearts[i].alpha = 0.75
             health.hearts[i].isVisible = false
             health.hearts[i].rate = rate
@@ -334,14 +322,15 @@ local function gameOver()
     objects = { }
 
     -- Update scores:
+    game.score = score
     if (score > game.highscore) then
+        game.highscoretext = "New High Score: " .. score
         game.highscore = score
         sounds.play("onWin")
     else
+        game.highscoretext = "HIGHSCORE: " .. game.highscore
         sounds.play("onFailed")
     end
-
-    UpdateStats()
 
     -- Switch to GAME OVER SCENE:
     switchScene("scenes.gameover")
@@ -406,20 +395,20 @@ function Spawn(objectType, xVelocity, yVelocity)
     local startX, startY
 
     if (xVelocity == 0) then
-        startX = math.random(sizeXY, display.contentWidth - sizeXY)
+        startX = math.random(sizeXY, ContentW - sizeXY)
     end
     if (xVelocity < 0) then
-        startX = display.contentWidth
+        startX = ContentW
     end
     if (xVelocity > 0) then
         startX = -sizeXY
     end
 
     if (yVelocity == 0) then
-        startY = math.random(sizeXY, display.contentHeight - sizeXY)
+        startY = math.random(sizeXY, ContentH - sizeXY)
     end
     if (yVelocity < 0) then
-        startY = display.contentHeight
+        startY = ContentH
     end
     if (yVelocity > 0) then
         startY = -sizeXY
@@ -679,6 +668,11 @@ local function OnTick(event)
             revolving_image.x = player.x
             revolving_image.y = player.y
         end
+
+        -- Update high-score text label:
+        if (score > game.highscore) then
+            highScoreLabel.text = "Highest Score: " .. tostring(score)
+        end
     end
 
     local tDelta = event.time - tPrevious
@@ -693,9 +687,9 @@ local function OnTick(event)
         object:translate(xDelta, yDelta)
 
         local off_screen = {
-            yPos > (display.contentHeight + object.sizeXY),
+            yPos > (ContentH + object.sizeXY),
             yPos < -object.sizeXY,
-            xPos > (display.contentWidth + object.sizeXY),
+            xPos > (ContentW + object.sizeXY),
             xPos < -object.sizeXY,
         }
 

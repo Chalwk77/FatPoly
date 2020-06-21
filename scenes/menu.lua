@@ -16,6 +16,8 @@ local centerY = display.contentCenterY
 local particles = { }
 local spawn_particles
 
+local buttons = { }
+
 local function switchScene(event)
 
     local sceneID = event.target.id
@@ -37,7 +39,7 @@ local function setUpDisplay(grp)
     local real_W = display.actualContentWidth
 
     local borders = {
-        strokeWidth = 7,
+        strokeWidth = 8,
         alpha = 1,
         { 0, 0, real_W, 0, }, -- top
         { real_W, real_H, 0, real_H }, -- bottom
@@ -69,8 +71,8 @@ local function setUpDisplay(grp)
     -- RENDER GAME ICON CUBE:
     --
     local icon = display.newImage("Icon.png")
-    icon.x = real_W * 0.5 - 169
-    icon.y = real_H * 0.5 + 90
+    icon.x = real_W * 0.5 - 168
+    icon.y = real_H * 0.5 + 89
     icon.rotation = 45
     icon.alpha = 0.50
     icon:scale(0.2, 0.2)
@@ -126,6 +128,7 @@ local function setUpDisplay(grp)
     optionsBtn.alpha = 1
     optionsBtn:scale(1, 0.70)
     grp:insert(optionsBtn)
+    buttons[#buttons + 1] = optionsBtn
 
     ------------------
     --- ABOUT BUTTON
@@ -141,6 +144,18 @@ local function setUpDisplay(grp)
     aboutBtn.y = optionsBtn.y + 45
     aboutBtn:scale(1, 0.70)
     grp:insert(aboutBtn)
+    buttons[#buttons + 1] = aboutBtn
+
+    for i = 1, #buttons do
+        local x1 = buttons[i].x - buttons[i].width / 2
+        local x2 = buttons[i].x + buttons[i].width / 2
+        local offset = 17
+        local height = buttons[i].y + offset
+        local line = display.newLine(x1, height, x2, height)
+        line:setStrokeColor(colors.RGB("green"))
+        line.strokeWidth = 2
+        buttons[i].line = line
+    end
 end
 
 function scene:create()
@@ -153,16 +168,7 @@ function scene:show(event)
     local grp = self.view
     local phase = event.phase
     if (phase == "will") then
-
-        local path = system.pathForFile(stats_file, system.DocumentsDirectory)
-        local content
-        local file = io.open(path, "r")
-        if (file ~= nil) then
-            content = file:read("*all")
-            io.close(file)
-        end
-        game = json:decode(content)
-
+        game = loadStats()
         CheckForUpdates(grp)
         spawn_particles = true
     elseif (phase == "did") then
@@ -189,13 +195,22 @@ function scene:hide(event)
     end
 end
 
+local function Hover(m)
+    for i = 1, #buttons do
+        local dist = (m.x - buttons[i].x) ^ 2 + (m.y - buttons[i].y) ^ 2
+        if (dist <= 1000) then
+            buttons[i].line.isVisible = true
+        else
+            buttons[i].line.isVisible = false
+        end
+    end
+end
+
 function randomSpeed()
     return math.random(1, 2) / 10 * 1
 end
 
 function SpawnObject(objectType, xVelocity, yVelocity)
-
-    objectType = "reward"
 
     if (spawn_particles) then
 
@@ -380,5 +395,6 @@ physics.setScale(60)
 physics.setGravity(0, 0)
 
 Runtime:addEventListener("enterFrame", AnimateMenu)
+Runtime:addEventListener("mouse", Hover)
 
 return scene

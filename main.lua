@@ -4,8 +4,9 @@ local composer = require('composer')
 local sounds = require('libraries.sounds')
 local json = require("libraries.json")
 
+local stats_file = "stats.json"
+
 game = { }
-stats_file = "stats.json"
 app_version = "1.0.0"
 
 -- Global function to animate Power ups in the Menu/Play scenes
@@ -14,6 +15,32 @@ AnimatePowerUp = function(Obj)
         transition.to(Obj, { time = 255, alpha = 1, xScale = 0.7, yScale = 0.7, onComplete = AnimatePowerUp })
     end
     transition.to(Obj, { time = 255, alpha = 1, xScale = 1, yScale = 1, onComplete = scaleUp })
+end
+
+loadStats = function()
+    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
+    local content
+    local file = io.open(path, "r")
+    if (file ~= nil) then
+        content = file:read("*all")
+        io.close(file)
+    end
+    return json:decode(content)
+end
+
+UpdateStats = function()
+    local path = system.pathForFile(stats_file, system.DocumentsDirectory)
+    local content
+    local file = io.open(path, "r")
+    if (file ~= nil) then
+        content = file:read("*all")
+        io.close(file)
+    end
+    local file = assert(io.open(path, "w"))
+    if (file) then
+        file:write(json:encode_pretty(game))
+        io.close(file)
+    end
 end
 
 local function Keys(event)
@@ -61,7 +88,9 @@ function CheckFile()
         if (data == nil) then
             data = {
                 color = "default_color",
+                score = 0,
                 highscore = 0,
+                highscoretext = "N/A",
                 levels = {
                     [1] = { true, 30, { 1, 2, 0.005 } },
                     [2] = { false, 60, { 1, 2, 0.010 } },

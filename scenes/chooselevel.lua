@@ -2,12 +2,12 @@ local composer = require('composer')
 local scene = composer.newScene()
 
 local widget = require('widget')
+local toast = require('modules.toast')
 local sounds = require('libraries.sounds')
 local colors = require('libraries.colors-rgb')
 
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
-local toast = require('modules.toast')
 local group = display.newGroup()
 
 local function switchScene(event)
