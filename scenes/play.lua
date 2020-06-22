@@ -741,15 +741,15 @@ function onCollision(event)
                 end
                 o.isVisible = false
 
-                local R, G, B = borders.color()
-                for i = 1, #borders do
-                    borders[i].object:setStrokeColor(R, G, B)
-                end
-
                 local current_level = game.current_level
                 local required = game.levels[current_level][2]
 
                 if (score == required) then
+
+                    local R, G, B = borders.color()
+                    for i = 1, #borders do
+                        borders[i].object:setStrokeColor(R, G, B)
+                    end
 
                     -- Update level:
                     local new_level = current_level + 1

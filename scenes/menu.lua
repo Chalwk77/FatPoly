@@ -65,17 +65,6 @@ local function setUpDisplay(grp)
     grp:insert(background)
 
     --
-    -- RENDER GAME ICON CUBE:
-    --
-    local icon = display.newImage("Icon.png")
-    icon.x = real_W * 0.5 - 168
-    icon.y = real_H * 0.5 + 89
-    icon.rotation = 45
-    icon.alpha = 0.50
-    icon:scale(0.2, 0.2)
-    grp:insert(icon)
-
-    --
     -- RENDER GAME TITLE LOGO:
     --
     local logo = display.newImage("images/menu scene/logo.png")
@@ -121,7 +110,7 @@ local function setUpDisplay(grp)
     })
 
     optionsBtn.x = centerX
-    optionsBtn.y = centerX + centerY - 180
+    optionsBtn.y = centerX + centerY - 170
     optionsBtn.alpha = 1
     optionsBtn:scale(1, 0.70)
     grp:insert(optionsBtn)
@@ -138,7 +127,7 @@ local function setUpDisplay(grp)
     })
 
     aboutBtn.x = centerX
-    aboutBtn.y = optionsBtn.y + 45
+    aboutBtn.y = optionsBtn.y + 50
     aboutBtn:scale(1, 0.70)
     grp:insert(aboutBtn)
     buttons[#buttons + 1] = aboutBtn
@@ -376,7 +365,7 @@ function CheckForUpdates(grp)
     local game_version = display.newText(txt[1], display.viewableContentWidth / 2, display.viewableContentHeight / 2, native.systemFontBold, 10)
     game_version:setFillColor(1, 0.9, 0.5)
     game_version.x = display.contentCenterX
-    game_version.y = display.contentCenterX + display.contentCenterY - 90
+    game_version.y = display.contentCenterX + display.contentCenterY - 92
     game_version.alpha = 0.50
 
     grp:insert(game_version)

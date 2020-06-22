@@ -6,6 +6,20 @@ local sounds = require('libraries.sounds')
 
 local path = system.pathForFile('stats.json', system.DocumentsDirectory)
 
+local W = display.viewableContentWidth
+local H = display.viewableContentHeight
+
+local splash1 = display.newImageRect('/splash1.png', 836, 357)
+splash1.x = W / 2
+splash1.y = H / 2
+splash1:scale(0.5, 0.5)
+splash1.enabled = true
+
+local splash2 = display.newImageRect('/splash2.png', 836, 357)
+splash2.x = W / 2
+splash2.y = H / 2
+splash2:scale(0.5, 0.5)
+
 game = { }
 app_version = "1.0.0"
 
@@ -84,10 +98,31 @@ local function CheckFile()
     end
 end
 
-CheckFile()
+local function Init()
+    splash1:removeSelf()
+    splash2:removeSelf()
+    CheckFile()
+    system.setIdleTimer(false)
+    Runtime:addEventListener("key", Keys)
+    display.setStatusBar(display.HiddenStatusBar)
+    composer.gotoScene("scenes.menu")
+end
 
-system.setIdleTimer(false)
-Runtime:addEventListener("key", Keys)
-display.setStatusBar(display.HiddenStatusBar)
-
-composer.gotoScene("scenes.menu")
+if (not splash1.enabled) then
+    Init()
+else
+    local time = 1500
+    transition.to(splash2, {
+        time = time,
+        alpha = 0.1,
+        onComplete = function(img)
+            transition.to(img, {
+                time = time,
+                alpha = 1,
+                onComplete = function()
+                    Init()
+                end
+            })
+        end
+    })
+end
