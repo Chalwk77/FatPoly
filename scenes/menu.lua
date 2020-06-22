@@ -170,6 +170,7 @@ function scene:show(event)
         spawn_particles = true
     elseif (phase == "did") then
         menu_tPrevious = system.getTimer()
+        Runtime:addEventListener("mouse", Hover)
         Runtime:addEventListener("enterFrame", AnimateMenu)
         SpawnObject("food", 0, randomSpeed())
         SpawnObject("food", 0, -randomSpeed())
@@ -180,7 +181,6 @@ function scene:show(event)
         SpawnObject("poison", randomSpeed(), 0)
         SpawnObject("poison", -randomSpeed(), 0)
         SpawnObject("reward", randomSpeed(), 0)
-        Runtime:addEventListener("mouse", Hover)
     end
 end
 
@@ -199,6 +199,8 @@ function scene:hide(event)
 
         Runtime:removeEventListener("mouse", Hover)
         Runtime:removeEventListener("enterFrame", AnimateMenu)
+    elseif (phase == "did") then
+        -- N/A
     end
 end
 
