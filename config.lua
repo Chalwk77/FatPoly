@@ -1,14 +1,12 @@
--- config.lua for Particle Plex
--- Copyright 2017 Jericho Crosby. All Rights Reserved.
+-- config.lua for Fat Poly
+-- Copyright 2020 Jericho Crosby. All Rights Reserved.
 
 application = {
     content = {
         width = 320,
         height = 480,
         fps = 60,
-        antialias = true,
-        imageSuffix =
-        {
+        imageSuffix = {
             ["@2x"] = 2.0,
             ["@4x"] = 4.0
         }

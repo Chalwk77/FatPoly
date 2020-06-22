@@ -440,35 +440,32 @@ function Spawn(objectType, xVelocity, yVelocity)
         AnimatePowerUp(Object)
     end
 
-    if (Object) then
-
-        if (objectType == "poison") then
-            Object:setFillColor(colors.RGB("red"))
-        elseif (objectType == "food") then
-            Object:setFillColor(colors.RGB("green"))
-        elseif (objectType == "reward") then
-            Object:setFillColor(colors.RGB("purple"))
-        end
-
-        Object.x = startX
-        Object.y = startY
-        --Object.alpha = (gameIsOver and 20 or 255)
-        Object.alpha = 0
-        Object.objectType = objectType
-        Object.xVelocity = xVelocity
-        Object.yVelocity = yVelocity
-        Object.isFixedRotation = true
-
-        Object.strokeWidth = 1
-        Object:setStrokeColor(colors.RGB("white"))
-
-        local collisionFilter = { categoryBits = 4, maskBits = 2 }
-        local body = { filter = collisionFilter, isSensor = true }
-        physics.addBody(Object, body)
-        table.insert(objects, Object)
-
-        transition.to(Object, {time = 1000, alpha = 1})
+    if (objectType == "poison") then
+        Object:setFillColor(colors.RGB("red"))
+    elseif (objectType == "food") then
+        Object:setFillColor(colors.RGB("green"))
+    elseif (objectType == "reward") then
+        Object:setFillColor(colors.RGB("purple"))
     end
+
+    Object.x = startX
+    Object.y = startY
+    --Object.alpha = (gameIsOver and 20 or 255)
+    Object.alpha = 0
+    Object.objectType = objectType
+    Object.xVelocity = xVelocity
+    Object.yVelocity = yVelocity
+    Object.isFixedRotation = true
+
+    Object.strokeWidth = 1
+    Object:setStrokeColor(colors.RGB("white"))
+
+    local collisionFilter = { categoryBits = 4, maskBits = 2 }
+    local body = { filter = collisionFilter, isSensor = true }
+    physics.addBody(Object, body)
+    table.insert(objects, Object)
+
+    transition.to(Object, { time = 1000, alpha = 1 })
 end
 
 local function gameSpecial(objectType)
@@ -778,6 +775,7 @@ function onCollision(event)
 
             elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
                 sounds.play("onDamage")
+                system.vibrate()
                 health.amount = health.amount - 1
 
                 local txt = health_params.txt

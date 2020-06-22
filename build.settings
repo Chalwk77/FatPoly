@@ -1,34 +1,33 @@
 settings = {
-    splashScreen =
-    {
-        ios = {
-            enable = false,
-            image = "splashScreen.png"
-        },
+
+    splashScreen = {
         android = {
             enable = false,
             image = "splashScreen.png"
         }
     },
+
     orientation = {
         default = 'landscapeRight',
-        supported = {'landscapeRight'}
+        supported = { 'landscapeRight' }
     },
+
     android = {
         installLocation = 'auto',
         isGame = true,
         largeHeap = true,
-        usesPermissions =
-        {
-           "android.permission.INTERNET",
+        usesPermissions = {
+        "android.permission.INTERNET",
+        "android.permission.VIBRATE"
         },
         usesFeatures = {
-            {name = 'android.hardware.gamepad', required = false}
+            {
+                name = 'android.hardware.gamepad',
+                required = false
+            }
         },
-        mainIntentFilter = {
-            categories = {'tv.ouya.intent.category.GAME'}
-        }
     },
+
     window = {
         defaultMode = 'normal',
         defaultViewWidth = 1280,
@@ -38,26 +37,14 @@ settings = {
         minViewHeight = 720,
         enableCloseButton = true,
         enableMinimizeButton = true,
-        enableMaximizeButton = false,
+        enableMaximizeButton = true,
         suspendWhenMinimized = true,
-        titleText = {default = 'Fat Poly'}
+        titleText = { default = 'Fat Poly' }
     },
+
     excludeFiles = {
         all = {
-            'Sothlink Project Files/*.lmk',
-            'readme.md',
-            'Banner-*.png',
-            'Icon-*dpi.png',
-            'Icon-ouya-xiaomi.png',
-            'Icon-ouya.png',
-            'Icon-tvOS-*.png',
-            '*.icns',
-            '*.ico',
-            'icon1024.png',
-            'icon1024-iOS.png',
-            'key.der',
             '*.keystore',
-            'maps/*.tmx',
-            'prepare_icons.sh'}
+        }
     }
 }
