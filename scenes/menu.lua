@@ -283,7 +283,6 @@ function SpawnObject(objectType, xVelocity, yVelocity)
 end
 
 function AnimateMenu(event)
-
     local delta_time = (event.time - menu_tPrevious)
     menu_tPrevious = event.time
 
