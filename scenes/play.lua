@@ -23,7 +23,7 @@ local speedFactor = 1
 local speed = { }
 
 local score = 0
-local tPrevious = system.getTimer()
+local tPrevious
 
 local borders = { }
 local objects = { }
@@ -103,7 +103,7 @@ local function setUpDisplay(grp)
     revolving_image.isVisible = false
     grp:insert(revolving_image)
 
-    rewardLabel = display.newText("reward", CX, CY, native.systemFontBold, 18)
+    rewardLabel = display.newText("", CX, CY, native.systemFontBold, 18)
     rewardLabel:setTextColor(colors.RGB("green"))
     rewardLabel.x = RePen.x
     rewardLabel.y = RePen.y
@@ -190,7 +190,7 @@ local function setUpDisplay(grp)
     sidebar:new()
 end
 
-function scene:create(event)
+function scene:create(_)
     physics.start()
     physics.setScale(60)
     physics.setGravity(0, 0)
@@ -252,6 +252,7 @@ function scene:show(event)
         -- Play Background music: (loop)
         --sounds.playStream('game_music')
 
+        tPrevious = system.getTimer()
         Runtime:addEventListener("collision", onCollision)
         Runtime:addEventListener("enterFrame", OnTick)
     end
@@ -264,11 +265,12 @@ function scene:hide(event)
             CleanUpScene()
         end
     elseif (phase == "did") then
-        -- N/A
+        Runtime:removeEventListener("collision", onCollision)
+        Runtime:removeEventListener("enterFrame", OnTick)
     end
 end
 
-function scene:destroy(event)
+function scene:destroy(_)
 
 end
 
@@ -280,23 +282,23 @@ end
 function createPlayer(x, y, width, height, rotation, visible)
     local playerCollisionFilter = { categoryBits = 2, maskBits = 5 }
     local playerBodyElement = { filter = playerCollisionFilter }
-    local player = display.newRect(x, y, width, height)
-    player.isBullet = true
-    player.objectType = "player"
-    player.rotation = rotation
-    player.isVisible = visible
-    player.resize = false
-    player.isSleepingAllowed = false
-    player.x = x
-    player.y = y
-    player.anchorX = 0.5
-    player.anchorY = 0.5
+    local p = display.newRect(x, y, width, height)
+    p.isBullet = true
+    p.objectType = "player"
+    p.rotation = rotation
+    p.isVisible = visible
+    p.resize = false
+    p.isSleepingAllowed = false
+    p.x = x
+    p.y = y
+    p.anchorX = 0.5
+    p.anchorY = 0.5
 
-    player:setFillColor(colors.RGB(game.color))
-    player:setStrokeColor(colors.RGB("white"))
-    player.strokeWidth = 1.2
-    physics.addBody(player, "dynamic", playerBodyElement)
-    return player
+    p:setFillColor(colors.RGB(game.color))
+    p:setStrokeColor(colors.RGB("white"))
+    p.strokeWidth = 1.2
+    physics.addBody(p, "dynamic", playerBodyElement)
+    return p
 end
 
 local function randomSpeed()
@@ -435,6 +437,7 @@ function Spawn(objectType, xVelocity, yVelocity)
         local Size = math.random(10, 15)
         Object = display.newCircle(startX, startY, Size)
         Object.sizeXY = 0
+        AnimatePowerUp(Object)
     end
 
     if (Object) then
@@ -449,7 +452,8 @@ function Spawn(objectType, xVelocity, yVelocity)
 
         Object.x = startX
         Object.y = startY
-        Object.alpha = (gameIsOver and 20 or 255)
+        --Object.alpha = (gameIsOver and 20 or 255)
+        Object.alpha = 0
         Object.objectType = objectType
         Object.xVelocity = xVelocity
         Object.yVelocity = yVelocity
@@ -461,8 +465,9 @@ function Spawn(objectType, xVelocity, yVelocity)
         local collisionFilter = { categoryBits = 4, maskBits = 2 }
         local body = { filter = collisionFilter, isSensor = true }
         physics.addBody(Object, body)
-
         table.insert(objects, Object)
+
+        transition.to(Object, {time = 3000, alpha = 1})
     end
 end
 
@@ -470,6 +475,7 @@ local function gameSpecial(objectType)
     local r = math.random(1, 4)
 
     revolving_image.rotation = 0
+    spawnConstraint = "no"
 
     if (objectType == "reward") then
         if (r == 1) then
@@ -480,26 +486,14 @@ local function gameSpecial(objectType)
                 player.height = pH
             end
             player.resize = true
-            rewardLabel.text = "weight loss"
+            rewardLabel.text = "** weight loss **"
             rewardLabel.isVisible = true
             local Hide = function()
                 rewardLabel.isVisible = false
             end
-            transition.to(rewardLabel, { time = 1000, delay = 2000, onComplete = Hide })
-            local oW = player.width
-            local oH = player.height
-            transition.to(player, {
-                time = 3000,
-                delay = 3000,
-                width = (oW - oW / 2),
-                height = (oH - oH / 2),
-                onComplete = function(p)
-                    p.width = oW
-                    p.height = oH
-                end
-            })
+            transition.to(rewardLabel, { time = 3000, onComplete = Hide })
         elseif (r == 2) then
-            rewardLabel.text = "all you can eat"
+            rewardLabel.text = "** all you can eat **"
             spawnConstraint = "allyoucaneat"
             rewardBar.isVisible = true
             rewardLabel.isVisible = true
@@ -517,11 +511,10 @@ local function gameSpecial(objectType)
             if (speedFactor ~= 1) then
                 return
             end
-            rewardLabel.text = "traffic jam"
+            rewardLabel.text = "** traffic jam **"
             rewardBar.isVisible = true
             rewardLabel.isVisible = true
             revolving_image.isVisible = true
-            transition.to(rewardLabel, { time = 500, delay = 4500 })
             speedFactor = 0.5
             calculateNewVelocity(objects)
             local closure = function()
@@ -536,7 +529,7 @@ local function gameSpecial(objectType)
             transition.to(rewardBar, { time = 5000, width = 0, onComplete = closure })
             transition.to(revolving_image, { time = 5000, rotation = 360 })
         elseif (r == 4) then
-            rewardLabel.txt = "+25 health"
+            rewardLabel.txt = "** +25 health **"
             rewardLabel.isVisible = true
             health.amount = health.amount + 5
             if (health.amount > starting_health) then
@@ -545,7 +538,7 @@ local function gameSpecial(objectType)
             local Hide = function()
                 rewardLabel.isVisible = false
             end
-            transition.to(rewardLabel, { time = 1000, delay = 3000, onComplete = Hide })
+            transition.to(rewardLabel, { time = 3000, onComplete = Hide })
         end
     elseif (objectType == "penalty") then
         if (r == 1) then
@@ -556,27 +549,14 @@ local function gameSpecial(objectType)
                 player.height = max_player_size
             end
             player.resize = true
-            penaltyLabel.text = "weight gain"
+            penaltyLabel.text = "** weight gain **"
             penaltyLabel.isVisible = true
             local Hide = function()
                 penaltyLabel.isVisible = false
             end
-            transition.to(penaltyLabel, { time = 1000, delay = 3000, onComplete = Hide })
-            local oW = player.width
-            local oH = player.height
-            transition.to(player, {
-                time = 3000,
-                delay = 3000,
-                width = (oW + oW / 2),
-                height = (oH + oH / 2),
-                onComplete = function(p)
-                    p.width = oW
-                    p.height = oH
-                end
-            })
+            transition.to(penaltyLabel, { time = 3000, onComplete = Hide })
         elseif (r == 2) then
-            penaltyLabel.text = "food contaminated"
-            transition.to(penaltyLabel, { time = 500, delay = 4500 })
+            penaltyLabel.text = "** food contaminated **"
             penaltyBar.isVisible = true
             penaltyLabel.isVisible = true
             revolving_image.isVisible = true
@@ -594,8 +574,7 @@ local function gameSpecial(objectType)
             if (speedFactor ~= 1) then
                 return
             end
-            penaltyLabel.text = "rush hour"
-            transition.to(penaltyLabel, { time = 500, delay = 4500 })
+            penaltyLabel.text = "** rush hour **"
             speedFactor = 2
             calculateNewVelocity(objects)
             penaltyBar.isVisible = true
@@ -657,7 +636,6 @@ function OnTick(event)
         local txt = health_params.txt
         local Tab = health_params[health.hearts.current]
         health.bar.new(txt, Tab)
-
         --
         -- Display Level Label:
         --
@@ -754,87 +732,91 @@ function onCollision(event)
             o = event.object1
             ot = event.object1.objectType
         end
-        if ("food" == ot and spawnConstraint == "no") or (spawnConstraint == "allyoucaneat") then
-            sounds.play("onPickup")
-            score = score + 1
-            scoreLabel.text = tostring(score)
-            if (player.width < max_player_size) then
-                player.resize = true
-            end
-            o.isVisible = false
 
-            local R, G, B = borders.color()
-            for i = 1, #borders do
-                borders[i].object:setStrokeColor(R, G, B)
-            end
+        if (o.alpha > 0.10) then
 
-            local current_level = game.current_level
-            local required = game.levels[current_level][2]
-
-            if (score == required) then
-
-                -- Update level:
-                local new_level = current_level + 1
-                if (new_level == #game.levels) then
-                    new_level = #game.levels
+            if ("food" == ot and spawnConstraint == "no") or (spawnConstraint == "allyoucaneat") then
+                sounds.play("onPickup")
+                score = score + 1
+                scoreLabel.text = tostring(score)
+                if (player.width < max_player_size) then
+                    player.resize = true
                 end
-                game.current_level = new_level
-                game.levels[new_level][1] = true
-                --
+                o.isVisible = false
 
-                -- Play level-up sound effect:
-                sounds.play("onLevelup")
-                --
-
-                -- Update food speed:
-                SetLevelSpeed()
-                --
-
-                -- Show lightning effect:
-                ShowLightning(player.x, player.y)
-                --
-            end
-
-        elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
-            sounds.play("onDamage")
-            health.amount = health.amount - 1
-
-            local txt = health_params.txt
-            local chars = {}
-            for i = 1, string.len(txt) do
-                chars[i] = string.sub(txt, i, i)
-            end
-
-            local replacement = ""
-            for i = 1, #chars do
-                if (i < #chars) then
-                    replacement = replacement .. chars[i]
+                local R, G, B = borders.color()
+                for i = 1, #borders do
+                    borders[i].object:setStrokeColor(R, G, B)
                 end
-            end
-            health_params.txt = replacement
 
-            if (health.amount < 1) then
-                gameOver()
-            else
-                local hit = display.newImageRect('images/misc/particle effects/hit.png', 180, 182)
-                hit.x, hit.y = player.x, player.y
-                local fromScale, toScale = 0.3, 0.7
-                hit:scale(fromScale, fromScale)
-                hit:setFillColor(1, 0.9, 0.5)
-                transition.to(hit, {
-                    time = 100,
-                    xScale = toScale,
-                    yScale = toScale,
-                    alpha = 0.50,
-                    onComplete = function(object)
-                        object:removeSelf()
+                local current_level = game.current_level
+                local required = game.levels[current_level][2]
+
+                if (score == required) then
+
+                    -- Update level:
+                    local new_level = current_level + 1
+                    if (new_level == #game.levels) then
+                        new_level = #game.levels
                     end
-                })
+                    game.current_level = new_level
+                    game.levels[new_level][1] = true
+                    --
+
+                    -- Play level-up sound effect:
+                    sounds.play("onLevelup")
+                    --
+
+                    -- Update food speed:
+                    SetLevelSpeed()
+                    --
+
+                    -- Show lightning effect:
+                    ShowLightning(player.x, player.y)
+                    --
+                end
+
+            elseif (ot == "poison") or (spawnConstraint == "foodcontaminated") then
+                sounds.play("onDamage")
+                health.amount = health.amount - 1
+
+                local txt = health_params.txt
+                local chars = {}
+                for i = 1, string.len(txt) do
+                    chars[i] = string.sub(txt, i, i)
+                end
+
+                local replacement = ""
+                for i = 1, #chars do
+                    if (i < #chars) then
+                        replacement = replacement .. chars[i]
+                    end
+                end
+                health_params.txt = replacement
+
+                if (health.amount < 1) then
+                    gameOver()
+                else
+                    local hit = display.newImageRect('images/misc/particle effects/hit.png', 180, 182)
+                    hit.x, hit.y = player.x, player.y
+                    local fromScale, toScale = 0.3, 0.7
+                    hit:scale(fromScale, fromScale)
+                    hit:setFillColor(1, 0.9, 0.5)
+                    transition.to(hit, {
+                        time = 100,
+                        xScale = toScale,
+                        yScale = toScale,
+                        alpha = 0.50,
+                        onComplete = function(object)
+                            object:removeSelf()
+                        end
+                    })
+                end
+            elseif (ot == "reward") or (ot == "penalty") then
+                sounds.play("onPowerup")
+                o.isVisible = false
+                gameSpecial(ot)
             end
-        elseif (ot == "reward") or (ot == "penalty") then
-            sounds.play("onPowerup")
-            o.isVisible = false
-            gameSpecial(ot)
         end
     end
 end
@@ -847,7 +829,10 @@ function SetLevelSpeed()
 end
 
 function HeartsAnimation()
-    local obj = health.hearts[health.hearts.current]
+
+    local c = health.hearts.current or 1
+    local obj = health.hearts[c]
+
     local scaleUp = function()
         transition.to(obj, {
             time = obj.rate,
@@ -878,6 +863,13 @@ function ShowLightning(x, y)
             object.isVisible = false
         end
     })
+end
+
+function AnimatePowerUp(Obj)
+    local scaleUp = function()
+        transition.to(Obj, { time = 255, alpha = 0.25, xScale = 0.7, yScale = 0.7, onComplete = AnimatePowerUp })
+    end
+    transition.to(Obj, { time = 255, alpha = 0.25, xScale = 1, yScale = 1, onComplete = scaleUp })
 end
 
 scene:addEventListener("create", scene)

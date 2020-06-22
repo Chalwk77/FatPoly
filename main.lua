@@ -1,34 +1,18 @@
 -- Entry point for Fat Poly, by Jericho Crosby
 
+local json = require("json")
 local composer = require('composer')
 local sounds = require('libraries.sounds')
-local json = require("json")
 
 local path = system.pathForFile('stats.json', system.DocumentsDirectory)
 
 game = { }
 app_version = "1.0.0"
 
--- Global function to animate Power ups in the Menu/Play scenes:
-AnimatePowerUp = function(Obj)
-    local scaleUp = function()
-        transition.to(Obj, { time = 255, alpha = 1, xScale = 0.7, yScale = 0.7, onComplete = AnimatePowerUp })
-    end
-    transition.to(Obj, { time = 255, alpha = 1, xScale = 1, yScale = 1, onComplete = scaleUp })
-end
-
 saveData = function()
     local file = assert(io.open(path, "w"))
     if (file) then
         file:write(json.prettify(game))
-        io.close(file)
-    end
-end
-
-local function loadData()
-    local file = io.open(path, 'r')
-    if file then
-        game = json.decode(file:read('*a'))
         io.close(file)
     end
 end
@@ -40,8 +24,8 @@ local function Keys(event)
             if (event.keyName == "escape" or event.keyName == "back") then
                 sounds.play('onTap')
                 native.showAlert("Confirm Exit", "Are you sure you want to exit?", { "Yes", "No" },
-                        function(event)
-                            if (event.action == 'clicked' and event.index == 1) then
+                        function(E)
+                            if (E.action == 'clicked' and E.index == 1) then
                                 native.requestExit()
                             end
                         end
@@ -60,19 +44,19 @@ local function Keys(event)
     return false
 end
 
-function CheckFile()
-    local file = io.open(path, "a")
-    if (file) then
-        io.close(file)
+local function CheckFile()
+    local F1 = io.open(path, "a")
+    if (F1) then
+        io.close(F1)
     end
     local content
-    local file = io.open(path, "r")
-    if (file) then
-        content = file:read("*all")
-        io.close(file)
+    local F2 = io.open(path, "r")
+    if (F2) then
+        content = F2:read("*all")
+        io.close(F2)
     end
-    local file = assert(io.open(path, "w"))
-    if (file) then
+    local F3 = assert(io.open(path, "w"))
+    if (F3) then
         local data = json.decode(content)
         if (data == nil) then
             data = {
@@ -94,13 +78,13 @@ function CheckFile()
                 }
             }
         end
-        file:write(json.prettify(data))
-        io.close(file)
+        F3:write(json.prettify(data))
+        io.close(F3)
+        game = data
     end
 end
 
 CheckFile()
-loadData()
 
 system.setIdleTimer(false)
 Runtime:addEventListener("key", Keys)

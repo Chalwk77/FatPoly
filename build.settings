@@ -16,12 +16,12 @@ settings = {
     },
     android = {
         installLocation = 'auto',
+        isGame = true,
+        largeHeap = true,
         usesPermissions =
         {
            "android.permission.INTERNET",
         },
-        isGame = true,
-        largeHeap = true,
         usesFeatures = {
             {name = 'android.hardware.gamepad', required = false}
         },

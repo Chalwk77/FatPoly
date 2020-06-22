@@ -6,7 +6,7 @@ local sounds = require('libraries.sounds')
 local physics = require("physics")
 local colors = require("libraries.colors-rgb")
 
-local menu_tPrevious = system.getTimer()
+local menu_tPrevious
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
 
@@ -169,6 +169,8 @@ function scene:show(event)
         CheckForUpdates(grp)
         spawn_particles = true
     elseif (phase == "did") then
+        menu_tPrevious = system.getTimer()
+        Runtime:addEventListener("enterFrame", AnimateMenu)
         SpawnObject("food", 0, randomSpeed())
         SpawnObject("food", 0, -randomSpeed())
         SpawnObject("food", randomSpeed(), 0)
@@ -187,7 +189,6 @@ function scene:hide(event)
     if (phase == "will") then
         spawn_particles = false
 
-        Runtime:removeEventListener("mouse", Hover)
         for i = 1, #buttons do
             buttons[i].line.isVisible = false
         end
@@ -195,6 +196,9 @@ function scene:hide(event)
             v:removeSelf()
         end
         particles = { }
+
+        Runtime:removeEventListener("mouse", Hover)
+        Runtime:removeEventListener("enterFrame", AnimateMenu)
     end
 end
 
@@ -346,6 +350,13 @@ function AnimateMenu(event)
     end
 end
 
+function AnimatePowerUp(Obj)
+    local scaleUp = function()
+        transition.to(Obj, { time = 255, alpha = 0.25, xScale = 0.7, yScale = 0.7, onComplete = AnimatePowerUp })
+    end
+    transition.to(Obj, { time = 255, alpha = 0.25, xScale = 1, yScale = 1, onComplete = scaleUp })
+end
+
 function CheckForUpdates(grp)
     local http = require("socket.http")
     local current_version = system.getInfo("appVersionString")
@@ -396,7 +407,5 @@ scene:addEventListener("hide", scene)
 physics.start()
 physics.setScale(60)
 physics.setGravity(0, 0)
-
-Runtime:addEventListener("enterFrame", AnimateMenu)
 
 return scene
