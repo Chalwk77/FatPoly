@@ -467,7 +467,7 @@ function Spawn(objectType, xVelocity, yVelocity)
         physics.addBody(Object, body)
         table.insert(objects, Object)
 
-        transition.to(Object, {time = 3000, alpha = 1})
+        transition.to(Object, {time = 1000, alpha = 1})
     end
 end
 
