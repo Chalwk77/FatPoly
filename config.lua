@@ -8,7 +8,6 @@ application = {
         fps = 60,
         imageSuffix = {
             ["@2x"] = 2.0,
-            ["@4x"] = 4.0
         }
     },
 }
