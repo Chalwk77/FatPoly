@@ -35,52 +35,6 @@ local function setUpDisplay(grp)
     local real_H = display.actualContentHeight
     local real_W = display.actualContentWidth
 
-    local ColorGroup = display.newGroup()
-    ColorGroup.x, ColorGroup.y = real_W * 0.5 - 250, real_H * 0.5 - 40
-    local COLORS = {
-        { id = "RED", color = { 255 / 255, 0 / 255, 0 / 255 } },
-        { id = "ORANGE", color = { 255 / 255, 128 / 255, 0 / 255 } },
-        { id = "YELLOW", color = { 255 / 255, 255 / 255, 0 / 255 } },
-        { id = "LIME", color = { 128 / 255, 255 / 255, 0 / 255 } },
-        { id = "GREEN", color = { 0 / 255, 255 / 255, 0 / 255 } },
-        { id = "TURQUOISE", color = { 0 / 255, 255 / 255, 128 / 255 } },
-        { id = "LIGHT BLUE", color = { 0 / 255, 255 / 255, 255 / 255 } },
-        { id = "BABY BLUE", color = { 0 / 255, 128 / 255, 255 / 255 } },
-        { id = "BLUE", color = { 0 / 255, 0 / 255, 255 / 255 } },
-        { id = "INDIGO", color = { 127 / 255, 0 / 255, 255 / 255 } },
-        { id = "HOT PINK", color = { 255 / 255, 0 / 255, 255 / 255 } },
-        { id = "PINK", color = { 255 / 255, 255 / 255, 127 / 255 } },
-        { id = "GREY", color = { 128 / 255, 128 / 255, 128 / 255 } },
-    }
-
-    local j = 1
-    local W, H = 52, 52
-    local spacing = W + 10
-
-    for i = 1, #COLORS do
-        local character = display.newGroup()
-        ColorGroup:insert(character)
-        local rect = display.newRect(character, 0, 0, W, H)
-        rect.strokeWidth = 2
-        rect:setFillColor(unpack(COLORS[i].color))
-        rect:setStrokeColor(0 / 255, 0 / 255, 0 / 255)
-        rect.alpha = 1
-        character.x, character.y = i * spacing, 0
-        transition.from(character, {
-            time = 1500,
-            delay = 200 * j,
-            y = -real_H,
-            transition = easing.outExpo
-        })
-
-        if i > #COLORS / 2 then
-            rect.y = rect.y + H + H
-            rect.x = (-real_W * 0.5) - 132
-        end
-
-        j = j + 1
-    end
-
     local borders = {
         strokeWidth = 8,
         alpha = 1,

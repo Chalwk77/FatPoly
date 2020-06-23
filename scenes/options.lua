@@ -90,7 +90,7 @@ local function setUpDisplay(grp)
     local SoundOn = widget.newButton({
         label = "Turn sound Off",
         labelColor = { default = { colors.RGB("red") }, over = { colors.RGB("blue") } },
-        fontSize = 32,
+        fontSize = 16,
         font = native.systemFontBold,
         onRelease = function()
             sounds.isSoundOn = false
@@ -99,8 +99,6 @@ local function setUpDisplay(grp)
     })
     SoundOn.x = centerX
     SoundOn.y = centerX + centerY - 180
-    SoundOn.width = 100
-    SoundOn.height = 25
     grp:insert(SoundOn)
 
 
@@ -111,7 +109,7 @@ local function setUpDisplay(grp)
         label = "Turn sound On",
         labelColor = { default = { colors.RGB("blue") }, over = { colors.RGB("red") } },
         font = native.systemFontBold,
-        fontSize = 32,
+        fontSize = 16,
         onRelease = function()
             audio.stop()
             sounds.isSoundOn = true
@@ -120,8 +118,6 @@ local function setUpDisplay(grp)
     })
     SoundOff.x = SoundOn.x
     SoundOff.y = SoundOn.y
-    SoundOff.width = 100
-    SoundOff.height = 25
     grp:insert(SoundOff)
 
 
@@ -129,16 +125,14 @@ local function setUpDisplay(grp)
     -- Color Selection Menu Button:
     --
     local colorSelection = widget.newButton({
-        label = "Color Selection",
+        label = "SELECT PLAYER COLOR",
         id = "scenes.colorselection",
-        fontSize = 32,
+        fontSize = 16,
         labelColor = { default = { colors.RGB("blue") }, over = { colors.RGB("green") } },
         onRelease = switchScene,
     })
     colorSelection.x = SoundOff.x
-    colorSelection.y = SoundOff.y + 30
-    colorSelection.width = 100
-    colorSelection.height = 25
+    colorSelection.y = SoundOff.y + 45
     grp:insert(colorSelection)
 
 

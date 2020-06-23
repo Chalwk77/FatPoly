@@ -5,8 +5,13 @@ local widget = require('widget')
 local toast = require('modules.toast')
 local sounds = require('libraries.sounds')
 
+local colors = require('libraries.colors-rgb')
+
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
+
+local colorbox = { }
+local group = display.newGroup()
 
 local function switchScene(event)
     local sceneID = event.target.id
@@ -51,53 +56,72 @@ local function setUpDisplay(grp)
     backButton.alpha = 1
     backButton:scale(0.25, 0.25)
     grp:insert(backButton)
+end
 
-    local x, y = -2, 0
-    local spacing = 100
-    for i = 1, 9 do
+function ShowButtons()
 
-        local COLOR = widget.newButton({
-            defaultFile = 'images/misc/player colors/color' .. i .. '.png',
-            overFile = 'images/misc/player colors/color' .. i .. '-over.png',
-            width = 64, height = 64,
-            x = x * spacing + 240,
-            y = 100 + y * spacing + 25,
-            onRelease = function()
-                if (i == 1) then
-                    game.color = "red"
-                elseif (i == 2) then
-                    game.color = "yellow"
-                elseif (i == 3) then
-                    game.color = "pink"
-                elseif (i == 4) then
-                    game.color = "green"
-                elseif (i == 5) then
-                    game.color = "purple"
-                elseif (i == 6) then
-                    game.color = "orange"
-                elseif (i == 7) then
-                    game.color = "blue"
-                elseif (i == 8) then
-                    game.color = "white"
-                elseif (i == 9) then
-                    game.color = "black"
-                end
-                if (game.color == "white") then
-                    toast.new(game.color, 750, "white", "black")
-                elseif (game.color == "black") then
-                    toast.new(game.color, 750, "black", "white")
-                else
-                    toast.new(game.color, 750, "white", game.color)
-                end
+    local real_H = display.actualContentHeight
+    local real_W = display.actualContentWidth
+
+    colorbox = {
+        "red",
+        "orange",
+        "yellow",
+        "lime",
+        "green",
+        "turquoise",
+        "lightblue",
+        "babyblue",
+        "darkblue",
+        "indigo",
+        "hotpink",
+        "pink",
+    }
+
+    group = display.newGroup()
+    group.x, group.y = 0, real_H * 0.5 - 20
+
+    local startX = group.x
+    local size = 38
+    local spacing = size
+    local reset = true
+
+    for i = 1, #colorbox do
+        local button = widget.newButton({
+            emboss = false,
+            shape = "rect",
+            width = size,
+            height = size,
+            cornerRadius = 0,
+            fillColor = { default = { colors.RGB(colorbox[i]) }, over = { colors.RGB(colorbox[i]) } },
+            strokeColor = { default = { 0 / 255, 0 / 255, 0 / 255 }, over = { 255 / 255, 255 / 255, 255 / 255 } },
+            strokeWidth = 2,
+            onEvent = function()
+                game.color = colorbox[i]
+                toast.new(colorbox[i], 750, "white", colorbox[i])
             end
         })
-        COLOR:scale(0.5, 0.5)
-        grp:insert(COLOR)
-        x = x + 1
-        if x == 3 then
-            x = -2
-            y = y + 1
+
+        if (i <= #colorbox / 2) then
+            button.x = startX + spacing
+        else
+            if (reset) then
+                reset = false
+                spacing = size
+            end
+            button.y = button.y + (button.width * 2)
+            button.x = startX + spacing
         end
+
+        spacing = spacing + (button.width * 2)
+        group:insert(button)
+
+        transition.from(button, {
+            time = 1500,
+            delay = 200 * i,
+            y = -real_W,
+            transition = easing.outExpo
+        })
     end
 end
 
@@ -105,12 +129,17 @@ function scene:create(_)
     setUpDisplay(self.view)
 end
 
-function scene:show(_)
-    -- N/A
+function scene:show(event)
+    local phase = event.phase
+    if (phase == "will") then
+        -- N/A
+    elseif (phase == "did") then
+        ShowButtons()
+    end
 end
 
-function scene:hide(event)
-    -- N/A
+function scene:hide(_)
+    group:removeSelf()
 end
 
 -- -------------------------------------------------------------------------------
