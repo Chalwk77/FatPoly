@@ -15,8 +15,8 @@ local buttons = {
     {
         defaultFile = "images/buttons/menu.png",
         overFile = "images/buttons/menu-over.png",
-        width = 42,
-        height = 42,
+        width = 32,
+        height = 32,
         onRelease = function()
             composer.gotoScene("scenes.menu", { effect = "crossFade", time = 300 })
         end
@@ -24,8 +24,8 @@ local buttons = {
     {
         defaultFile = "images/buttons/restart.png",
         overFile = "images/buttons/restart-over.png",
-        width = 42,
-        height = 42,
+        width = 32,
+        height = 32,
         onRelease = function()
             composer.gotoScene("scenes.reload_game", { effect = "crossFade", time = 300 })
         end
@@ -33,26 +33,17 @@ local buttons = {
     {
         defaultFile = "images/buttons/colorSelection.png",
         overFile = "images/buttons/colorSelection-over.png",
-        width = 42,
-        height = 42,
+        width = 32,
+        height = 32,
         onRelease = function()
             composer.gotoScene("scenes.colorselection", { effect = "crossFade", time = 300 })
         end
     },
     {
-        defaultFile = "images/buttons/help.png",
-        overFile = "images/buttons/help-over.png",
-        width = 42,
-        height = 42,
-        onRelease = function()
-            composer.gotoScene("scenes.about", { effect = "crossFade", time = 300 })
-        end
-    },
-    {
         defaultFile = "images/buttons/exit.png",
         overFile = "images/buttons/exit-over.png",
-        width = 42,
-        height = 42,
+        width = 32,
+        height = 32,
         onRelease = function()
             native.showAlert("Confirm Exit", "Are you sure you want to exit?", { "Yes", "No" },
                     function(e)
@@ -60,6 +51,15 @@ local buttons = {
                             native.requestExit()
                         end
                     end)
+        end
+    },
+    {
+        defaultFile = "images/buttons/help.png",
+        overFile = "images/buttons/help-over.png",
+        width = 32,
+        height = 32,
+        onRelease = function()
+            composer.gotoScene("scenes.about", { effect = "crossFade", time = 300 })
         end
     }
 }
@@ -70,7 +70,7 @@ function sidebar:new()
     self.bar.x = (real_W - (real_W - 30))
     self.bar.y = real_H * 0.5
     self.bar.width = 60
-    self.bar.height = real_H
+    self.bar.height = real_H - 7
     group:insert(self.bar)
 
     self.title = display.newImage(group, "images/misc/pause/paused.png", true)
@@ -108,10 +108,11 @@ function sidebar:new()
     })
     self.resume_button.isVisible = false
 
-    local spacing = 5
-    local height_buffer = 0
-
     local button_group = display.newGroup()
+    local startY = (real_H - real_H + 35)
+    local offset = 3
+    local spacing = startY
+
     for i = 1, #buttons do
         local button = widget.newButton({
             defaultFile = buttons[i].defaultFile,
@@ -122,9 +123,9 @@ function sidebar:new()
         })
 
         button.x = self.bar.x
-        button.y = button_group.height + button.height - spacing
-        button_group.y = button_group.y - height_buffer
-        spacing = spacing - button.height - 10
+        button.y = startY + button_group.height + button.height - spacing + offset
+        spacing = spacing - button.height - 17
+
         button_group:insert(button)
         group:insert(button)
     end

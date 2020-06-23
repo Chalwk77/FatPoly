@@ -1,5 +1,6 @@
 local composer = require('composer')
 local scene = composer.newScene()
+
 local widget = require('widget')
 local sounds = require('libraries.sounds')
 local databox = require('libraries.databox')
@@ -47,16 +48,24 @@ local function setUpDisplay(grp)
     grp:insert(title_logo)
 
     local toScale = math.random(0.1, 0.2)
-    local random_sise = math.random(1, 2)
+    local random_size = math.random(1, 2)
     local rotation
-    if random_sise == 1 then
+    if (random_size == 1) then
         rotation = 360
     else
         rotation = -360
     end
-    transition.to(title_logo, { time = math.random(100, 250), delta = true, iterations = 2, rotation = rotation, xScale = toScale, yScale = toScale, onComplete = function(object)
-        object:scale(1, 1)
-    end })
+    transition.to(title_logo, {
+        time = math.random(100, 250),
+        delta = true,
+        iterations = 2,
+        rotation = rotation,
+        xScale = toScale,
+        yScale = toScale,
+        onComplete = function(object)
+            object:scale(1, 1)
+        end
+    })
 
 
     --

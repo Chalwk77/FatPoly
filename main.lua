@@ -13,7 +13,7 @@ local splash1 = display.newImageRect('/splash1.png', 836, 357)
 splash1.x = W / 2
 splash1.y = H / 2
 splash1:scale(0.5, 0.5)
-splash1.enabled = true
+splash1.enabled = false
 
 local splash2 = display.newImageRect('/splash2.png', 836, 357)
 splash2.x = W / 2
@@ -111,13 +111,24 @@ end
 if (not splash1.enabled) then
     Init()
 else
-    local time = 1500
-    transition.to(splash2, {
-        time = time,
-        alpha = 0.1,
+    local time1 = 1000
+    local time2 = time1 / 2
+    transition.to(splash1, {
+        time = time2,
+        alpha = 0,
         onComplete = function(img)
             transition.to(img, {
-                time = time,
+                time = time2,
+                alpha = 1,
+            })
+        end
+    })
+    transition.to(splash2, {
+        time = time1,
+        alpha = 0,
+        onComplete = function(img)
+            transition.to(img, {
+                time = time1,
                 alpha = 1,
                 onComplete = function()
                     Init()

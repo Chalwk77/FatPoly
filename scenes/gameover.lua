@@ -53,6 +53,23 @@ local function setUpDisplay(grp)
     highScoreLabel.alpha = 1
     highScoreLabel.isVisible = false
     grp:insert(highScoreLabel)
+
+    local width = (display.contentWidth / 2)
+    local height = (display.contentHeight / 2)
+
+    local backButton = widget.newButton({
+        defaultFile = "images/buttons/back.png",
+        overFile = "images/buttons/back-over.png",
+        onRelease = function()
+            sounds.play("onTap")
+            composer.gotoScene("scenes.menu", { effect = "crossFade", time = 300 })
+        end
+    })
+    backButton.x = width - width + 20
+    backButton.y = height - height + 20
+    backButton.alpha = 1
+    backButton:scale(0.25, 0.25)
+    grp:insert(backButton)
 end
 
 function scene:create(_)

@@ -5,6 +5,7 @@ local widget = require('widget')
 local sounds = require('libraries.sounds')
 local physics = require("physics")
 local colors = require("libraries.colors-rgb")
+local relayout = require('libraries.relayout')
 
 local menu_tPrevious
 local centerX = display.contentCenterX
@@ -34,6 +35,43 @@ local function setUpDisplay(grp)
 
     local real_H = display.actualContentHeight
     local real_W = display.actualContentWidth
+
+    --local titleGroup = display.newGroup()
+    --titleGroup.x, titleGroup.y = real_W * 0.5, real_H * 0.5
+    --relayout.add(titleGroup)
+    --
+    --local title = "YOU WIN"
+    --local j = 1
+    --for i = -3, 3 do
+    --    local character = display.newGroup()
+    --    titleGroup:insert(character)
+    --    local rect = display.newRect(character, 0, 0, 32, 32)
+    --    rect.strokeWidth = 1
+    --    rect:setFillColor(0.25)
+    --    rect:setStrokeColor(0.15)
+    --    rect.alpha = 1
+    --    local text = display.newText({
+    --        parent = character,
+    --        text = title:sub(j, j),
+    --        x = 0, y = 0,
+    --        font = native.systemFontBold,
+    --        fontSize = 24
+    --    })
+    --    if (text.text == " ") then
+    --        rect:removeSelf()
+    --    else
+    --        local spacing = 35
+    --        text:setFillColor(0.10, 1.5, 5.2)
+    --        character.x, character.y = i * spacing, 0
+    --        transition.from(character, {
+    --            time = 100,
+    --            delay = 200 * j,
+    --            y = -real_H,
+    --            transition = easing.outExpo
+    --        })
+    --    end
+    --    j = j + 1
+    --end
 
     local borders = {
         strokeWidth = 8,
@@ -110,7 +148,7 @@ local function setUpDisplay(grp)
     })
 
     optionsBtn.x = centerX
-    optionsBtn.y = centerX + centerY - 170
+    optionsBtn.y = centerX + centerY - 175
     optionsBtn.alpha = 1
     optionsBtn:scale(1, 0.70)
     grp:insert(optionsBtn)
