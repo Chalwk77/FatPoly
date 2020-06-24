@@ -250,7 +250,7 @@ function scene:show(event)
         highScoreLabel.isVisible = true
 
         -- Play Background music: (loop)
-        --sounds.playStream('game_music')
+        sounds.playStream('game_music')
 
         tPrevious = system.getTimer()
         Runtime:addEventListener("collision", onCollision)
@@ -451,7 +451,6 @@ function Spawn(objectType, xVelocity, yVelocity)
 
     Object.x = startX
     Object.y = startY
-    --Object.alpha = (gameIsOver and 20 or 255)
     Object.alpha = 0
     Object.objectType = objectType
     Object.xVelocity = xVelocity

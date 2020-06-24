@@ -147,11 +147,9 @@ end
 
 function scene:create()
     setUpDisplay(self.view)
-    --sounds.playStream('menu_music')
 end
 
 function scene:show(event)
-
     local grp = self.view
     local phase = event.phase
     if (phase == "will") then
@@ -170,6 +168,7 @@ function scene:show(event)
         SpawnObject("poison", randomSpeed(), 0)
         SpawnObject("poison", -randomSpeed(), 0)
         SpawnObject("reward", randomSpeed(), 0)
+        sounds.playStream('menu_music')
     end
 end
 
