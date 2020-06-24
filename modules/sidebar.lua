@@ -3,6 +3,7 @@ local sidebar = {}
 
 local composer = require('composer')
 local databox = require('libraries.databox')
+local sounds = require('libraries.sounds')
 
 local group = display.newGroup()
 
@@ -12,14 +13,6 @@ local real_W = display.actualContentWidth
 local open_delay = 200
 local close_delay = 200
 local SoundOn, SoundOff
-
-local function GetSoundState()
-    if (databox.isSoundOn) then
-        return { "images/buttons/sounds_on.png", "images/buttons/sounds_on-over.png" }
-    else
-        return { "images/buttons/sounds_off.png", "images/buttons/sounds_off-over.png" }
-    end
-end
 
 local buttons = {
     [1] = {
@@ -59,10 +52,11 @@ local buttons = {
             width = 32,
             height = 32,
             onRelease = function()
-                databox.isSoundOn = false
+                sounds.isSoundOn = false
+                databox.isSoundOn = sounds.isSoundOn
+
                 SoundOn.isVisible = false
                 SoundOff.isVisible = true
-                UpdateSound()
             end
         },
         {
@@ -71,10 +65,11 @@ local buttons = {
             width = 32,
             height = 32,
             onRelease = function()
-                databox.isSoundOn = true
+                sounds.isSoundOn = true
+                databox.isSoundOn = sounds.isSoundOn
+
                 SoundOn.isVisible = true
                 SoundOff.isVisible = false
-                UpdateSound()
             end
         }
     },
@@ -104,14 +99,6 @@ local buttons = {
         end
     }
 }
-
-function UpdateSound()
-    if (databox.isSoundOn) then
-        databox.isSoundOn = false
-    else
-        databox.isSoundOn = true
-    end
-end
 
 function sidebar:new()
     self.bar = display.newImage(group, "images/misc/sidebar/sidebar.png", true)
@@ -171,6 +158,7 @@ function sidebar:new()
                 height = buttons[i][1].height,
                 onRelease = buttons[i][1].onRelease
             })
+
             SoundOff = widget.newButton({
                 defaultFile = buttons[i][2].defaultFile,
                 overFile = buttons[i][2].overFile,
@@ -183,6 +171,9 @@ function sidebar:new()
             SoundOn.y = startY + button_group.height + SoundOn.height - spacing + offset
             SoundOff.x = SoundOn.x
             SoundOff.y = SoundOn.y
+
+            SoundOn.isVisible = true
+            SoundOff.isVisible = false
 
             spacing = spacing - SoundOn.height - 17
 
