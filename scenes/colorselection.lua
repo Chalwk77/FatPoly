@@ -14,10 +14,11 @@ local colorbox = { }
 local group = display.newGroup()
 
 local function switchScene(event)
-    local sceneID = event.target.id
+    local sceneID = game.previousScene or event.target.id
     local options = { effect = "crossFade", time = 300 }
     composer.gotoScene(sceneID, options)
     sounds.play("onTap")
+    game.previousScene = nil
 end
 
 local function setUpDisplay(grp)
@@ -117,8 +118,8 @@ function ShowButtons()
         group:insert(button)
 
         transition.from(button, {
-            time = 1500,
-            delay = 200 * i,
+            time = 1000,
+            delay = 100 * i,
             y = -real_W,
             transition = easing.outExpo
         })

@@ -2,6 +2,7 @@ local widget = require("widget")
 local sidebar = {}
 
 local composer = require('composer')
+local databox = require('libraries.databox')
 
 local group = display.newGroup()
 
@@ -10,9 +11,18 @@ local real_W = display.actualContentWidth
 
 local open_delay = 200
 local close_delay = 200
+local SoundOn, SoundOff
+
+local function GetSoundState()
+    if (databox.isSoundOn) then
+        return { "images/buttons/sounds_on.png", "images/buttons/sounds_on-over.png" }
+    else
+        return { "images/buttons/sounds_off.png", "images/buttons/sounds_off-over.png" }
+    end
+end
 
 local buttons = {
-    {
+    [1] = {
         defaultFile = "images/buttons/menu.png",
         overFile = "images/buttons/menu-over.png",
         width = 32,
@@ -21,7 +31,8 @@ local buttons = {
             composer.gotoScene("scenes.menu", { effect = "crossFade", time = 300 })
         end
     },
-    {
+
+    [2] = {
         defaultFile = "images/buttons/restart.png",
         overFile = "images/buttons/restart-over.png",
         width = 32,
@@ -30,7 +41,8 @@ local buttons = {
             composer.gotoScene("scenes.reload_game", { effect = "crossFade", time = 300 })
         end
     },
-    {
+
+    [3] = {
         defaultFile = "images/buttons/colorSelection.png",
         overFile = "images/buttons/colorSelection-over.png",
         width = 32,
@@ -39,7 +51,35 @@ local buttons = {
             composer.gotoScene("scenes.colorselection", { effect = "crossFade", time = 300 })
         end
     },
-    {
+
+    [4] = {
+        {
+            defaultFile = "images/buttons/sounds_on.png",
+            overFile = "images/buttons/sounds_on-over.png",
+            width = 32,
+            height = 32,
+            onRelease = function()
+                databox.isSoundOn = false
+                SoundOn.isVisible = false
+                SoundOff.isVisible = true
+                UpdateSound()
+            end
+        },
+        {
+            defaultFile = "images/buttons/sounds_off.png",
+            overFile = "images/buttons/sounds_off-over.png",
+            width = 32,
+            height = 32,
+            onRelease = function()
+                databox.isSoundOn = true
+                SoundOn.isVisible = true
+                SoundOff.isVisible = false
+                UpdateSound()
+            end
+        }
+    },
+
+    [5] = {
         defaultFile = "images/buttons/exit.png",
         overFile = "images/buttons/exit-over.png",
         width = 32,
@@ -53,7 +93,8 @@ local buttons = {
                     end)
         end
     },
-    {
+
+    [6] = {
         defaultFile = "images/buttons/help.png",
         overFile = "images/buttons/help-over.png",
         width = 32,
@@ -64,8 +105,15 @@ local buttons = {
     }
 }
 
-function sidebar:new()
+function UpdateSound()
+    if (databox.isSoundOn) then
+        databox.isSoundOn = false
+    else
+        databox.isSoundOn = true
+    end
+end
 
+function sidebar:new()
     self.bar = display.newImage(group, "images/misc/sidebar/sidebar.png", true)
     self.bar.x = (real_W - (real_W - 30))
     self.bar.y = real_H * 0.5
@@ -114,20 +162,52 @@ function sidebar:new()
     local spacing = startY
 
     for i = 1, #buttons do
-        local button = widget.newButton({
-            defaultFile = buttons[i].defaultFile,
-            overFile = buttons[i].overFile,
-            width = buttons[i].width,
-            height = buttons[i].height,
-            onRelease = buttons[i].onRelease
-        })
 
-        button.x = self.bar.x
-        button.y = startY + button_group.height + button.height - spacing + offset
-        spacing = spacing - button.height - 17
+        if (i == 4) then
+            SoundOn = widget.newButton({
+                defaultFile = buttons[i][1].defaultFile,
+                overFile = buttons[i][1].overFile,
+                width = buttons[i][1].width,
+                height = buttons[i][1].height,
+                onRelease = buttons[i][1].onRelease
+            })
+            SoundOff = widget.newButton({
+                defaultFile = buttons[i][2].defaultFile,
+                overFile = buttons[i][2].overFile,
+                width = buttons[i][2].width,
+                height = buttons[i][2].height,
+                onRelease = buttons[i][2].onRelease
+            })
 
-        button_group:insert(button)
-        group:insert(button)
+            SoundOn.x = self.bar.x
+            SoundOn.y = startY + button_group.height + SoundOn.height - spacing + offset
+            SoundOff.x = SoundOn.x
+            SoundOff.y = SoundOn.y
+
+            spacing = spacing - SoundOn.height - 17
+
+            button_group:insert(SoundOn)
+            button_group:insert(SoundOff)
+            group:insert(SoundOn)
+            group:insert(SoundOff)
+
+        else
+
+            local button = widget.newButton({
+                defaultFile = buttons[i].defaultFile,
+                overFile = buttons[i].overFile,
+                width = buttons[i].width,
+                height = buttons[i].height,
+                onRelease = buttons[i].onRelease
+            })
+
+            button.x = self.bar.x
+            button.y = startY + button_group.height + button.height - spacing + offset
+            spacing = spacing - button.height - 17
+
+            button_group:insert(button)
+            group:insert(button)
+        end
     end
 
     group.y = 0
@@ -137,6 +217,7 @@ function sidebar:new()
 end
 
 function sidebar:show()
+
     self.title.isVisible = true
     transition.to(group, {
         time = open_delay,

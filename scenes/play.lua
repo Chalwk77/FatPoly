@@ -201,7 +201,7 @@ function scene:show(event)
     local phase = event.phase
     if (phase == "will") then
 
-        sidebar.pause_button.isVisible = true
+        --sidebar.pause_button.isVisible = true
 
         SetLevelSpeed()
         initHealthParams()
@@ -314,6 +314,7 @@ local function calculateNewVelocity(t)
 end
 
 function CleanUpScene()
+    print(debug.traceback())
 
     sidebar:hide()
     sidebar.pause_button.isVisible = false

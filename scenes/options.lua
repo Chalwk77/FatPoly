@@ -6,6 +6,8 @@ local sounds = require('libraries.sounds')
 local databox = require('libraries.databox')
 local colors = require('libraries.colors-rgb')
 
+local SoundOn, SoundOff
+
 local centerX = display.contentCenterX
 local centerY = display.contentCenterY
 local screenLeft = display.screenOriginX
@@ -18,6 +20,17 @@ local function switchScene(event)
     local options = { effect = "crossFade", time = 300, params = { title = event.target.id } }
     composer.gotoScene(sceneID, options)
     sounds.play("onTap")
+end
+
+function UpdateSound()
+    databox.isSoundOn = sounds.isSoundOn
+    SoundOn.isVisible = false
+    SoundOff.isVisible = false
+    if (databox.isSoundOn) then
+        SoundOn.isVisible = true
+    else
+        SoundOff.isVisible = true
+    end
 end
 
 local function setUpDisplay(grp)
@@ -85,27 +98,43 @@ local function setUpDisplay(grp)
 
 
     --
+    -- Color Selection Menu Button:
+    --
+    local colorSelection = widget.newButton({
+        label = "SELECT PLAYER COLOR",
+        id = "scenes.colorselection",
+        font = native.systemFontBold,
+        fontSize = 16,
+        labelColor = { default = { colors.RGB("blue") }, over = { colors.RGB("green") } },
+        onRelease = switchScene,
+    })
+    colorSelection.x = width
+    colorSelection.y = height + 30
+    grp:insert(colorSelection)
+
+
+    --
     -- Sound ON Button
     --
-    local SoundOn = widget.newButton({
+    SoundOn = widget.newButton({
         label = "Turn sound Off",
         labelColor = { default = { colors.RGB("red") }, over = { colors.RGB("blue") } },
         fontSize = 16,
         font = native.systemFontBold,
         onRelease = function()
             sounds.isSoundOn = false
-            updateDataboxAndVisibility()
+            UpdateSound()
         end
     })
-    SoundOn.x = centerX
-    SoundOn.y = centerX + centerY - 180
+    SoundOn.x = colorSelection.x
+    SoundOn.y = colorSelection.y + colorSelection.height
     grp:insert(SoundOn)
 
 
     --
     -- Sound OFF Button
     --
-    local SoundOff = widget.newButton({
+    SoundOff = widget.newButton({
         label = "Turn sound On",
         labelColor = { default = { colors.RGB("blue") }, over = { colors.RGB("red") } },
         font = native.systemFontBold,
@@ -113,43 +142,17 @@ local function setUpDisplay(grp)
         onRelease = function()
             audio.stop()
             sounds.isSoundOn = true
-            updateDataboxAndVisibility()
+            UpdateSound()
         end
     })
     SoundOff.x = SoundOn.x
     SoundOff.y = SoundOn.y
     grp:insert(SoundOff)
 
-
-    --
-    -- Color Selection Menu Button:
-    --
-    local colorSelection = widget.newButton({
-        label = "SELECT PLAYER COLOR",
-        id = "scenes.colorselection",
-        fontSize = 16,
-        labelColor = { default = { colors.RGB("blue") }, over = { colors.RGB("green") } },
-        onRelease = switchScene,
-    })
-    colorSelection.x = SoundOff.x
-    colorSelection.y = SoundOff.y + 45
-    grp:insert(colorSelection)
-
-
     --
     -- Update Sound State:
     --
-    function updateDataboxAndVisibility()
-        databox.isSoundOn = sounds.isSoundOn
-        SoundOn.isVisible = false
-        SoundOff.isVisible = false
-        if (databox.isSoundOn) then
-            SoundOn.isVisible = true
-        else
-            SoundOff.isVisible = true
-        end
-    end
-    updateDataboxAndVisibility()
+    UpdateSound()
 end
 
 function scene:create(_)
